@@ -4,14 +4,74 @@
   th:replace="~{layout :: html(head = null,content = ~{::content})}"
 >
   <th:block th:fragment="content">
-    <h1>分类目录</h1>
-    <ul>
-      <li th:each="category : ${categories}">
-        <a
-          th:href="@{${category.status.permalink}}"
-          th:text="${category.spec.displayName}"
-        ></a>
-      </li>
-    </ul>
+    <div class="archive-page archive-page--categories">
+
+      <!-- ====== Hero 头部 ====== -->
+      <header class="archive-hero">
+        <div class="archive-hero__bg"></div>
+        <div class="archive-hero__overlay"></div>
+
+        <div class="archive-hero__inner">
+          <nav class="archive-hero__breadcrumb">
+            <a th:href="@{/}">首页</a>
+            <span class="archive-hero__breadcrumb-sep">/</span>
+            <span class="archive-hero__breadcrumb-cur">分类</span>
+          </nav>
+
+          <h1 class="archive-hero__title">
+            <span class="archive-hero__kicker">Categories</span>
+            <span>全部分类</span>
+          </h1>
+
+          <div class="archive-hero__meta" th:if="${categories != null and not categories.isEmpty()}">
+            <span class="hero-badge hero-badge--accent">
+              <i class="Nug Nug-wenzhang2"></i>
+              <span th:text="${categories.size()}"></span>
+              <span>个分类</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="archive-hero__fade"></div>
+      </header>
+
+      <!-- ====== 分类卡片网格 ====== -->
+      <div class="categories-masonry" th:if="${categories != null and not categories.isEmpty()}">
+        <article class="category-card" th:each="category : ${categories}">
+          <a th:href="@{${category?.status?.permalink}}" class="category-card__link">
+
+            <!-- 封面 -->
+            <figure class="category-card__cover">
+              <img th:if="${not #strings.isEmpty(category?.spec?.cover)}"
+                   th:src="${category?.spec?.cover}"
+                   th:alt="${category?.spec?.displayName}" loading="lazy" />
+              <img th:unless="${not #strings.isEmpty(category?.spec?.cover)}"
+                   th:src="@{/assets/images/bg.jpg}"
+                   th:alt="${category?.spec?.displayName}" loading="lazy" />
+            </figure>
+
+            <!-- 内容 -->
+            <div class="category-card__body">
+              <h2 class="category-card__name" th:text="${category?.spec?.displayName}"></h2>
+              <p class="category-card__desc line-clamp"
+                 th:if="${not #strings.isEmpty(category?.spec?.description)}"
+                 th:text="${category?.spec?.description}"></p>
+            </div>
+
+            <!-- 角标 -->
+            <span class="category-card__count" th:text="${(category?.postCount ?: 0) + ' 篇'}"></span>
+          </a>
+        </article>
+      </div>
+
+      <!-- ====== 空状态 ====== -->
+      <div th:unless="${categories != null and not categories.isEmpty()}" class="archive-empty">
+        <div class="archive-empty__icon">
+          <i class="Nug Nug-wenzhang2"></i>
+        </div>
+        <h2>暂无分类</h2>
+        <p>分类创建后会显示在这里。</p>
+      </div>
+    </div>
   </th:block>
 </html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = null,content = ~{::content})}"
+>
+  <th:block th:fragment="content">
+    <!-- Author info -->
+    <div class="author-info">
+      <img class="author-avatar" th:src="${#strings.isEmpty(author?.spec?.avatar) ? #theme.assets('/images/avatar.jpg') : author?.spec?.avatar}" th:alt="${author?.spec?.displayName}" />
+      <div class="author-meta">
+        <h1 th:text="${author?.spec?.displayName}"></h1>
+        <p class="author-bio" th:if="${author?.spec?.bio}" th:text="${author?.spec?.bio}"></p>
+        <p class="author-bio" th:text="${posts.total} + ' 篇文章'"></p>
+      </div>
+    </div>
+
+    <!-- Author posts -->
+    <div class="author-posts">
+      <ul th:if="${posts.items != null and not posts.items.isEmpty()}">
+        <li th:each="post : ${posts.items}">
+          <time th:text="${#temporals.format(post?.spec?.publishTime, 'yyyy-MM-dd')}"></time>
+          <a th:href="@{${post?.status?.permalink}}" th:text="${post?.spec?.title}"></a>
+        </li>
+      </ul>
+      <div th:unless="${posts.items != null and not posts.items.isEmpty()}" class="empty-state">
+        该作者暂无文章。
+      </div>
+    </div>
+
+    <div class="pagination" th:if="${posts.hasPrevious() or posts.hasNext()}">
+      <a th:if="${posts.hasPrevious()}" th:href="@{${posts.prevUrl}}">上一页</a>
+      <a th:if="${posts.hasNext()}" th:href="@{${posts.nextUrl}}">下一页</a>
+    </div>
+  </th:block>
+</html>

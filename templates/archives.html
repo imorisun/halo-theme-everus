@@ -4,23 +4,48 @@
   th:replace="~{layout :: html(head = null,content = ~{::content})}"
 >
   <th:block th:fragment="content">
-    <th:block th:each="archive : ${archives.items}">
-      <h1 th:text="${archive.year}"></h1>
-      <ul class="listing">
-        <th:block th:each="month : ${archive.months}">
-          <li th:each="post : ${month.posts}">
-            <a
-              th:href="@{${post.status.permalink}}"
-              th:title="${post.spec.title}"
-              th:text="${post.spec.title}"
-            ></a>
-          </li>
-        </th:block>
-      </ul>
-    </th:block>
-    <a th:if="${archives.hasPrevious()}" th:href="@{${archives.prevUrl}}">
-      上一页
-    </a>
-    <a th:if="${archives.hasNext()}" th:href="@{${archives.nextUrl}}">下一页</a>
+    <div class="archives">
+      <div class="page-content" style="padding: 3rem 2rem;">
+        <div class="cat-group">
+          <header class="cat-header up">
+            <h2 class="cat-header__title">归档</h2>
+            <div class="cat-header__line"></div>
+            <span class="cat-header__count"></span>
+          </header>
+
+          <div th:if="${archives.items != null and not archives.items.isEmpty()}">
+            <div th:each="archive : ${archives.items}" class="archive-year">
+              <h3 class="archive-year__title" th:text="${archive.year}"></h3>
+              <ul class="archive-month-list">
+                <th:block th:each="month : ${archive.months}">
+                  <li class="archive-post-item" th:each="post : ${month.posts}">
+                    <time class="archive-post-date" th:text="${#temporals.format(post?.spec?.publishTime, 'MM-dd')}"></time>
+                    <a class="hover-link" th:href="@{${post?.status?.permalink}}" th:text="${post?.spec?.title}"></a>
+                  </li>
+                </th:block>
+              </ul>
+            </div>
+          </div>
+          <div th:unless="${archives.items != null and not archives.items.isEmpty()}" class="empty-state">
+            暂无归档。
+          </div>
+        </div>
+      </div>
+
+      <div class="page-navigator" th:if="${archives.hasPrevious() or archives.hasNext()}">
+        <div class="pagination-prve" th:if="${archives.hasPrevious()}">
+          <a th:href="@{${archives.prevUrl}}">
+            <i class="Nug Nug-youbian"></i>
+            <span>上一页</span>
+          </a>
+        </div>
+        <div class="pagination-next" th:if="${archives.hasNext()}">
+          <a th:href="@{${archives.nextUrl}}">
+            <span>下一页</span>
+            <i class="Nug Nug-youbian"></i>
+          </a>
+        </div>
+      </div>
+    </div>
   </th:block>
 </html>

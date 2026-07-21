@@ -1,13 +1,74 @@
 apiVersion: v1alpha1
 kind: Setting
 metadata:
-  name: theme-starter-setting
+  name: halo-theme-everus-setting
 spec:
   forms:
     - group: style
-      label: 样式
+      label: 样式设置
       formSchema:
-        - $formkit: color
-          name: background_color
-          label: 背景颜色
-          value: "#f2f2f2"
+        - $formkit: text
+          name: custom_font
+          label: 自定义字体URL
+          value: ""
+          help: "输入字体文件的URL地址，留空则使用默认系统字体。支持 woff2、woff、ttf、eot、svg 格式"
+
+    - group: banner
+      label: 首页Banner
+      formSchema:
+        - $formkit: attachment
+          name: banner_image
+          label: Banner 背景图
+          value: ""
+          help: "首页顶部Banner的背景图片，留空则使用默认暗色渐变"
+
+        - $formkit: attachment
+          name: avatar_image
+          label: 头像图片
+          value: ""
+          help: "Banner中显示的头像，留空则使用站点Logo"
+
+    - group: compass
+      label: 指南针（任务表）
+      formSchema:
+        - $formkit: textarea
+          name: tasks
+          label: 任务列表
+          value: ""
+          help: |
+            格式：时间线 || 标题 || 描述 || 链接
+            每行一条任务，使用 || 分隔字段
+            示例：2025 - 2026 || 目标标题 || 目标描述 || https://example.com
+            首页只显示前4条，完整列表请创建 slug 为 "compass" 的页面
+
+    - group: musings
+      label: 精选评论（Musings）
+      formSchema:
+        - $formkit: textarea
+          name: musings_comments
+          label: 精选评论列表
+          value: ""
+          help: |
+            输入要展示的评论 metadata.name（UUID），每行一个或用英文逗号分隔。
+            可在 Halo 控制台的评论管理中查看评论的 metadata.name。
+            首页最多展示 6 条，留空则隐藏该区块。
+
+    - group: social
+      label: 社交链接
+      formSchema:
+        - $formkit: text
+          name: github
+          label: GitHub
+          value: ""
+        - $formkit: text
+          name: twitter
+          label: Twitter
+          value: ""
+        - $formkit: text
+          name: weibo
+          label: 微博
+          value: ""
+        - $formkit: text
+          name: bilibili
+          label: Bilibili
+          value: ""

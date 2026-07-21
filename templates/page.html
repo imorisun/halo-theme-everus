@@ -4,7 +4,86 @@
   th:replace="~{layout :: html(head = null,content = ~{::content})}"
 >
   <th:block th:fragment="content">
-    <h1 th:text="${singlePage.spec.title}"></h1>
-    <article th:utext="${singlePage.content.content}"></article>
+    <!-- Compass 模板：显示任务表 -->
+    <th:block th:if="${singlePage.spec.slug == 'compass' and theme.config?.compass?.tasks != null and not #strings.isEmpty(theme.config?.compass?.tasks)}">
+      <th:block
+        th:with="lines=${#strings.split(theme.config?.compass?.tasks, '[\r\n]+')}">
+        <div id="swup-inner" class="page">
+          <div class="page-content">
+            <div class="cat-group">
+              <header class="compass-header">
+                <h2 class="compass-header__title" th:text="${singlePage.spec.title}"></h2>
+                <article th:utext="${singlePage.content.content}"></article>
+              </header>
+              <ul class="schedule-list" th:if="${#arrays.length(lines) > 0}">
+                <li class="schedule-item up" th:each="line : ${lines}">
+                  <th:block th:with="parts=${#strings.split(line, '[|][|]')}">
+                    <header class="schedule-header">
+                      <h3 class="schedule-title">
+                        <span class="accent"></span>
+                        <th:block th:text="${#arrays.length(parts) > 1 and not #strings.isEmpty(parts[1]) ? parts[1] : ''}"></th:block>
+                      </h3>
+                      <div class="schedule-meta">
+                        <time class="schedule-date" th:if="${#arrays.length(parts) > 0 and not #strings.isEmpty(parts[0])}" th:text="${parts[0]}"></time>
+                        <a class="text-link hover-link" th:if="${#arrays.length(parts) > 3 and not #strings.isEmpty(parts[3])}" th:href="${parts[3]}">详情</a>
+                      </div>
+                    </header>
+                    <p class="schedule-note" th:if="${#arrays.length(parts) > 2 and not #strings.isEmpty(parts[2])}" th:text="${parts[2]}"></p>
+                  </th:block>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Comments -->
+          <div class="page-comments">
+            <div th:if="${haloCommentEnabled}">
+              <halo:comment group="content.halo.run" kind="SinglePage" th:attr="name=${singlePage.metadata.name}" />
+            </div>
+            <div th:unless="${haloCommentEnabled}" class="empty-state">
+              评论未开启
+            </div>
+          </div>
+        </div>
+      </th:block>
+    </th:block>
+
+    <!-- 普通页面 -->
+    <th:block th:unless="${singlePage.spec.slug == 'compass' and theme.config?.compass?.tasks != null and not #strings.isEmpty(theme.config?.compass?.tasks)}">
+      <div class="post-content">
+        <div class="page-main">
+          <div class="page-img_content">
+            <div class="page-content">
+              <div class="post">
+                <header class="post__header">
+                  <h1 class="post__title" th:text="${singlePage.spec.title}"></h1>
+                </header>
+
+                <article class="post__content" th:utext="${singlePage.content.content}"></article>
+
+                <div class="post-divider up"></div>
+
+                <div class="post-footer up">
+                  <div class="post-date">
+                    <span>发布时间：</span>
+                    <th:block th:text="${#temporals.format(singlePage.spec.publishTime, 'yyyy-MM-dd')}"></th:block>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments -->
+          <div class="page-comments">
+            <div th:if="${haloCommentEnabled}">
+              <halo:comment group="content.halo.run" kind="SinglePage" th:attr="name=${singlePage.metadata.name}" />
+            </div>
+            <div th:unless="${haloCommentEnabled}" class="empty-state">
+              评论未开启
+            </div>
+          </div>
+        </div>
+      </div>
+    </th:block>
   </th:block>
 </html>

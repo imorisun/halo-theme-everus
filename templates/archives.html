@@ -33,7 +33,7 @@
       </div>
 
       <div class="page-navigator" th:if="${archives.hasPrevious() or archives.hasNext()}">
-        <div class="pagination-prve" th:if="${archives.hasPrevious()}">
+        <div class="pagination-prev" th:if="${archives.hasPrevious()}">
           <a th:href="@{${archives.prevUrl}}">
             <i class="Nug Nug-youbian"></i>
             <span>上一页</span>

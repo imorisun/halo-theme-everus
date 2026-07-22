@@ -6,17 +6,8 @@
   <th:block th:fragment="content">
     <div class="archive-page archive-page--category">
 
-      <!-- ====== Hero 头部（有显示名时） ====== -->
-      <header class="archive-hero archive-hero--cover" th:if="${category?.spec?.displayName}">
-        <!-- 背景图：拆分为 th:if / th:unless 避免三元表达式空指针 -->
-        <div th:if="${not #strings.isEmpty(category?.spec?.cover)}"
-             class="archive-hero__bg"
-             th:style="|background-image:url(${category?.spec?.cover})|"></div>
-        <div th:unless="${not #strings.isEmpty(category?.spec?.cover)}"
-             class="archive-hero__bg"
-             th:style="|background-image:url(@{/assets/images/bg.jpg})|"></div>
-        <div class="archive-hero__overlay"></div>
-
+      <!-- ====== Hero 头部 ====== -->
+      <header class="archive-hero" th:if="${category?.spec?.displayName}" th:classappend="${not #strings.isEmpty(category?.spec?.cover)} ? 'archive-hero--thumb' : ''">
         <div class="archive-hero__inner">
           <nav class="archive-hero__breadcrumb">
             <a th:href="@{/}">首页</a>
@@ -47,8 +38,8 @@
             <p th:text="${category?.spec?.description}"></p>
           </div>
         </div>
-
-        <div class="archive-hero__fade"></div>
+        <img class="archive-hero__thumb" th:if="${not #strings.isEmpty(category?.spec?.cover)}"
+             th:src="${category?.spec?.cover}" th:alt="${category?.spec?.displayName}" loading="lazy" />
       </header>
 
       <!-- ====== 回退 Header（无显示名时） ====== -->

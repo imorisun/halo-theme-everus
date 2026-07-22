@@ -8,9 +8,6 @@
 
       <!-- ====== Hero 头部 ====== -->
       <header class="archive-hero archive-hero--tinted" th:if="${tag?.spec?.displayName}">
-        <div class="archive-hero__bg"></div>
-        <div class="archive-hero__overlay"></div>
-
         <div class="archive-hero__inner">
           <nav class="archive-hero__breadcrumb">
             <a th:href="@{/}">首页</a>
@@ -26,7 +23,7 @@
           </h1>
 
           <div class="archive-hero__meta">
-            <span class="hero-badge hero-badge--accent" th:style="'background:' + ${tag?.spec?.color ?: '#26a760'} + ';color:#fff'">
+            <span class="hero-badge hero-badge--accent">
               <i class="Nug Nug-biaoqian"></i>
               <span th:text="${tag?.spec?.displayName}"></span>
             </span>
@@ -41,8 +38,6 @@
             </span>
           </div>
         </div>
-
-        <div class="archive-hero__fade"></div>
       </header>
 
       <!-- ====== 回退 Header（无显示名时） ====== -->

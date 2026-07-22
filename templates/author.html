@@ -7,11 +7,7 @@
     <div class="archive-page archive-page--author">
 
       <!-- ====== Hero 头部 ====== -->
-      <header class="archive-hero archive-hero--cover" th:if="${author?.spec?.displayName}">
-        <div class="archive-hero__bg"
-             th:style="|background-image:url(${#strings.isEmpty(author?.spec?.avatar) ? #theme.assets('/images/bg.jpg') : author.spec.avatar})|"></div>
-        <div class="archive-hero__overlay"></div>
-
+      <header class="archive-hero" th:if="${author?.spec?.displayName}">
         <div class="archive-hero__inner">
           <nav class="archive-hero__breadcrumb">
             <a th:href="@{/}">首页</a>
@@ -40,8 +36,6 @@
             <p th:text="${author?.spec?.bio}"></p>
           </div>
         </div>
-
-        <div class="archive-hero__fade"></div>
       </header>
 
       <!-- ====== 回退 Header ====== -->

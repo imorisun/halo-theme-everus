@@ -1,16 +1,60 @@
 @font-face {
-  font-family: "Nug"; /* Project id 4963141 */
-  src: url('//at.alicdn.com/t/c/font_4963141_c7xbrtbt19b.woff2?t=1754896682679') format('woff2'),
-       url('//at.alicdn.com/t/c/font_4963141_c7xbrtbt19b.woff?t=1754896682679') format('woff'),
-       url('//at.alicdn.com/t/c/font_4963141_c7xbrtbt19b.ttf?t=1754896682679') format('truetype');
+  font-family: "Nugfont"; /* Project id 4963141 */
+  src: url('//at.alicdn.com/t/c/font_4963141_ewbtm9164fc.woff2?t=1758530968888') format('woff2'),
+       url('//at.alicdn.com/t/c/font_4963141_ewbtm9164fc.woff?t=1758530968888') format('woff'),
+       url('//at.alicdn.com/t/c/font_4963141_ewbtm9164fc.ttf?t=1758530968888') format('truetype');
 }
 
 .Nug {
-  font-family: "Nug" !important;
+  font-family: "Nugfont" !important;
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.Nug-fanhui:before {
+  content: "\e605";
+}
+
+.Nug-youjiantou1:before {
+  content: "\e607";
+}
+
+.Nug-yinyong:before {
+  content: "\ec81";
+}
+
+.Nug-wuxinghongqi:before {
+  content: "\e745";
+}
+
+.Nug-yinle:before {
+  content: "\e60e";
+}
+
+.Nug-zjihu_29:before {
+  content: "\e61d";
+}
+
+.Nug-douban:before {
+  content: "\e658";
+}
+
+.Nug-Nug_bilibili:before {
+  content: "\e609";
+}
+
+.Nug-Nug_TikTok:before {
+  content: "\e60a";
+}
+
+.Nug-fangda:before {
+  content: "\e701";
+}
+
+.Nug-fangda1:before {
+  content: "\e656";
 }
 
 .Nug-dingzi2:before {
@@ -293,119 +337,119 @@
   content: "\e64b";
 }
 
-.Nug-icon11:before {
+.Nug-Nug11:before {
   content: "\e64f";
 }
 
-.Nug-icon17:before {
+.Nug-Nug17:before {
   content: "\e65a";
 }
 
-.Nug-icon18:before {
+.Nug-Nug18:before {
   content: "\e65b";
 }
 
-.Nug-icon19:before {
+.Nug-Nug19:before {
   content: "\e65c";
 }
 
-.Nug-icon20:before {
+.Nug-Nug20:before {
   content: "\e65d";
 }
 
-.Nug-icon22:before {
+.Nug-Nug22:before {
   content: "\e661";
 }
 
-.Nug-icon23:before {
+.Nug-Nug23:before {
   content: "\e662";
 }
 
-.Nug-icon24:before {
+.Nug-Nug24:before {
   content: "\e663";
 }
 
-.Nug-icon25:before {
+.Nug-Nug25:before {
   content: "\e665";
 }
 
-.Nug-icon26:before {
+.Nug-Nug26:before {
   content: "\e666";
 }
 
-.Nug-icon27:before {
+.Nug-Nug27:before {
   content: "\e668";
 }
 
-.Nug-icon29:before {
+.Nug-Nug29:before {
   content: "\e66c";
 }
 
-.Nug-icon30:before {
+.Nug-Nug30:before {
   content: "\e66d";
 }
 
-.Nug-icon31:before {
+.Nug-Nug31:before {
   content: "\e66e";
 }
 
-.Nug-icon32:before {
+.Nug-Nug32:before {
   content: "\e683";
 }
 
-.Nug-icon33:before {
+.Nug-Nug33:before {
   content: "\e684";
 }
 
-.Nug-icon34:before {
+.Nug-Nug34:before {
   content: "\e685";
 }
 
-.Nug-icon35:before {
+.Nug-Nug35:before {
   content: "\e686";
 }
 
-.Nug-icon36:before {
+.Nug-Nug36:before {
   content: "\e68b";
 }
 
-.Nug-icon37:before {
+.Nug-Nug37:before {
   content: "\e68d";
 }
 
-.Nug-icon39:before {
+.Nug-Nug39:before {
   content: "\e690";
 }
 
-.Nug-icon40:before {
+.Nug-Nug40:before {
   content: "\e691";
 }
 
-.Nug-icon41:before {
+.Nug-Nug41:before {
   content: "\e692";
 }
 
-.Nug-icon44:before {
+.Nug-Nug44:before {
   content: "\e697";
 }
 
-.Nug-icon45:before {
+.Nug-Nug45:before {
   content: "\e698";
 }
 
-.Nug-icon46:before {
+.Nug-Nug46:before {
   content: "\e69a";
 }
 
-.Nug-icon48:before {
+.Nug-Nug48:before {
   content: "\e69c";
 }
 
-.Nug-icon49:before {
+.Nug-Nug49:before {
   content: "\e69e";
 }
 
-.Nug-icon50:before {
+.Nug-Nug50:before {
   content: "\e6a0";
 }
 
@@ -453,46 +497,46 @@
   content: "\e647";
 }
 
-.Nug-icon:before {
+.Nug-Nug:before {
   content: "\e650";
 }
 
-.Nug-icon1:before {
+.Nug-Nug1:before {
   content: "\e651";
 }
 
-.Nug-icon2:before {
+.Nug-Nug2:before {
   content: "\e652";
 }
 
-.Nug-icon3:before {
+.Nug-Nug3:before {
   content: "\e654";
 }
 
-.Nug-icon4:before {
+.Nug-Nug4:before {
   content: "\e657";
 }
 
-.Nug-icon5:before {
+.Nug-Nug5:before {
   content: "\e65f";
 }
 
-.Nug-icon6:before {
+.Nug-Nug6:before {
   content: "\e66a";
 }
 
-.Nug-icon7:before {
+.Nug-Nug7:before {
   content: "\e68e";
 }
 
-.Nug-icon8:before {
+.Nug-Nug8:before {
   content: "\e693";
 }
 
-.Nug-icon9:before {
+.Nug-Nug9:before {
   content: "\e694";
 }
 
-.Nug-icon10:before {
+.Nug-Nug10:before {
   content: "\e699";
 }

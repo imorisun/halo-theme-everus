@@ -6,7 +6,7 @@
   <th:block th:fragment="content">
     <div class="page-content">
       <!-- Banner -->
-      <header class="banner banner--love" th:style="'background-image:url(' + ${#strings.isEmpty(theme.config?.banner?.banner_image) ? #theme.assets('/images/bg.jpg') : theme.config?.banner?.banner_image} + ');background-size:cover;'">
+      <header class="banner banner--love" th:style="'background-image:url(' + ${#strings.isEmpty(theme.config?.homepage?.banner_image) ? #theme.assets('/images/bg.jpg') : theme.config?.homepage?.banner_image} + ');background-size:cover;'">
         <div class="banner-overlay"></div>
       </header>
 
@@ -23,8 +23,8 @@
             </header>
 
             <ul class="cat-posts">
-              <th:block th:if="${posts.items != null and not posts.items.isEmpty()}">
-                <li class="cat-posts__item up" th:each="post : ${posts.items}">
+              <th:block th:if="${posts?.items != null and not posts.items.isEmpty()}">
+                <li class="cat-posts__item up" th:each="post,iterStat : ${posts.items}">
                   <h3 class="line-clamp">
                     <span class="accent"></span>
                     <a class="link hover-link" th:href="@{${post?.status?.permalink}}" th:text="${post?.spec?.title}"></a>
@@ -32,108 +32,79 @@
                   <p class="line-clamp" th:if="${post?.status?.excerpt}" th:text="${post?.status?.excerpt}"></p>
                   <a class="link hover-link" th:href="@{${post?.status?.permalink}}">展开我的故事</a>
                 </li>
+                <li class="cat-posts__more">
+                  <a th:href="@{/archives}" class="more-link">
+                    <span>全部文章</span>
+                    <span class="more-link__count"><em th:text="${posts?.total ?: 0}"></em> 篇</span>
+                    <i class="Nug Nug-youbian"></i>
+                  </a>
+                </li>
               </th:block>
-              <li th:unless="${posts.items != null and not posts.items.isEmpty()}" class="empty-state">
+              <li th:unless="${posts?.items != null and not posts.items.isEmpty()}" class="empty-state">
                 开始写下你的第一篇故事吧。
               </li>
             </ul>
           </li>
 
-          <!-- The Compass (任务表) -->
-          <th:block th:if="${theme.config?.compass?.tasks != null and not #strings.isEmpty(theme.config?.compass?.tasks)}">
-            <th:block
-              th:with="lines=${#strings.split(theme.config?.compass?.tasks, '[\r\n]+')}">
-              <li class="cat-group__item" th:if="${#arrays.length(lines) > 0}">
+          <!-- 最新动态（瞬间插件） -->
+          <th:block th:if="${momentFinder != null}">
+            <th:block th:with="homeMoments=${momentFinder.list(1, 6)}">
+              <li class="cat-group__item" th:if="${homeMoments?.items != null and not homeMoments.items.isEmpty()}">
                 <header class="cat-header up">
-                  <h2 class="cat-header__title">指南针</h2>
+                  <h2 class="cat-header__title">最新动态</h2>
                   <div class="cat-header__line"></div>
                   <span class="cat-header__count"></span>
                 </header>
 
-                <ul class="schedule-list">
-                  <th:block th:each="line,iterStat : ${lines}">
-                    <th:block th:if="${iterStat.index < 4}">
-                      <th:block th:with="parts=${#strings.split(line, '[|][|]')}">
-                        <li class="schedule-item up">
-                          <header class="schedule-header">
-                            <h3 class="schedule-title">
-                              <span class="accent"></span>
-                              <th:block th:text="${#arrays.length(parts) > 1 and not #strings.isEmpty(parts[1]) ? parts[1] : ''}"></th:block>
-                            </h3>
-                            <div class="schedule-meta">
-                              <time class="schedule-date" th:if="${#arrays.length(parts) > 0 and not #strings.isEmpty(parts[0])}" th:text="${parts[0]}"></time>
-                              <a class="text-link hover-link" th:if="${#arrays.length(parts) > 3 and not #strings.isEmpty(parts[3])}" th:href="${parts[3]}">详情</a>
-                            </div>
-                          </header>
-                          <p class="schedule-note" th:if="${#arrays.length(parts) > 2 and not #strings.isEmpty(parts[2])}" th:text="${parts[2]}"></p>
-                        </li>
-                      </th:block>
-                    </th:block>
-                  </th:block>
+                <ul class="home-moments">
+                  <li class="home-moment" th:each="moment : ${homeMoments.items}" th:with="content=${moment?.spec?.content}">
+                    <div class="home-moment__inner up">
+                      <div class="home-moment__user">
+                        <img class="home-moment__avatar"
+                             th:src="${moment?.owner?.avatar ?: #theme.assets('/images/avatar.jpg')}"
+                             th:alt="${moment?.owner?.displayName ?: '用户'}" />
+                        <span class="home-moment__name" th:text="${moment?.owner?.displayName ?: '用户'}"></span>
+                        <time class="home-moment__time" th:if="${moment.spec?.releaseTime}"
+                              th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}"></time>
+                      </div>
+                      <div class="home-moment__text" th:if="${content != null and not #strings.isEmpty(content?.html)}"
+                           th:utext="${content.html}"></div>
+                      <div class="home-moment__photos" th:if="${content?.medium != null and not #lists.isEmpty(content.medium)}">
+                        <th:block th:each="media : ${content.medium}">
+                          <img th:if="${media?.type?.name() == 'PHOTO'}"
+                               th:src="${media?.url}"
+                               class="home-moment__photo"
+                               loading="lazy" />
+                        </th:block>
+                      </div>
+
+                      <!-- 互动 -->
+                      <div class="home-moment__actions">
+                        <button class="home-moment__action home-moment__action--like" th:attr="onclick=|handleMomentUpvote(this, '${moment?.metadata?.name}')|">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                          <span th:attr="data-upvote-moment-name=|${moment?.metadata?.name}|" th:text="${moment?.stats?.upvote ?: 0}"></span>
+                        </button>
+                        <button class="home-moment__action" th:attr="onclick=|toggleMomentComments('${moment?.metadata?.name}')|">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          <span th:text="${moment?.stats?.totalComment ?: 0}"></span>
+                        </button>
+                      </div>
+                      <div class="home-moment__comments" th:id="|moment-comments-${moment?.metadata?.name}|">
+                        <halo:comment group="moment.halo.run" kind="Moment" th:attr="name=${moment.metadata.name}" />
+                      </div>
+                    </div>
+                  </li>
+
+                  <!-- 查看更多 -->
+                  <li class="cat-posts__more" th:if="${homeMoments?.total > 6}">
+                    <a th:href="@{/moments}" class="more-link">
+                      <span>全部动态</span>
+                      <span class="more-link__count"><em th:text="${homeMoments.total}"></em> 条</span>
+                      <i class="Nug Nug-youbian"></i>
+                    </a>
+                  </li>
                 </ul>
               </li>
-            </th:block>
-          </th:block>
-
-          <!-- Musings（精选评论轮播） -->
-          <th:block th:if="${theme.config?.musings?.musings_comments != null and not #strings.isEmpty(theme.config?.musings?.musings_comments)}">
-            <th:block th:with="rawIds=${theme.config?.musings?.musings_comments}">
-              <th:block th:with="ids=${#strings.split(#strings.contains(rawIds, ',') ? rawIds : #strings.split(rawIds, '[\r\n]+'), ',')}">
-                <li class="cat-group__item" th:if="${#arrays.length(ids) > 0}">
-                  <header class="cat-header up">
-                    <h2 class="cat-header__title">精选评论</h2>
-                    <div class="cat-header__line"></div>
-                    <span class="cat-header__count"></span>
-                  </header>
-
-                  <ul class="commentator-comment">
-                    <div class="commentator-slick up">
-                      <th:block th:each="id,iterStat : ${ids}">
-                        <th:block th:if="${iterStat.index < 6}">
-                          <th:block th:with="commentName=${#strings.trim(id)}">
-                            <th:block th:if="${not #strings.isEmpty(commentName)}">
-                              <th:block th:with="comment=${commentFinder.getByName(commentName)}">
-                                <li class="comment-chat" th:if="${comment != null}">
-                                  <div class="comment-item">
-                                    <header class="comment-header">
-                                      <img class="comment-avatar"
-                                           th:if="${comment.spec?.owner?.avatar}"
-                                           th:src="${comment.spec?.owner?.avatar}"
-                                           th:alt="${comment.spec?.owner?.displayName}" />
-                                      <img class="comment-avatar"
-                                           th:unless="${comment.spec?.owner?.avatar}"
-                                           th:src="@{/assets/images/avatar.jpg}"
-                                           th:alt="${comment.spec?.owner?.displayName ?: '匿名用户'}" />
-                                      <div class="comment-meta">
-                                        <span class="comment-author" th:text="${comment.spec?.owner?.displayName ?: '匿名用户'}"></span>
-                                        <time class="comment-time" th:if="${comment.spec?.creationTime}"
-                                              th:text="${#temporals.format(comment.spec?.creationTime, 'yyyy-MM-dd HH:mm')}"></time>
-                                      </div>
-                                    </header>
-
-                                    <p class="comment-content line-clamp" th:text="${comment.spec?.content}"></p>
-
-                                    <footer class="comment-footer" th:if="${comment.spec?.subject?.name}">
-                                      <span>《</span>
-                                      <a class="comment-post-link" th:href="@{/archives/__${comment.spec.subject.name}__}">
-                                        <span th:text="${comment.spec?.subject?.name}"></span>
-                                      </a>
-                                      <span>》</span>
-                                    </footer>
-                                  </div>
-                                </li>
-                              </th:block>
-                            </th:block>
-                          </th:block>
-                        </th:block>
-                      </th:block>
-                    </div>
-                    <div class="controls">
-                      <button class="slick-custom-next Nug Nug-youbian"></button>
-                    </div>
-                  </ul>
-                </li>
-              </th:block>
             </th:block>
           </th:block>
 
@@ -146,13 +117,6 @@
           </li>
         </ul>
       </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination" th:if="${posts.hasPrevious() or posts.hasNext()}">
-      <a th:if="${posts.hasPrevious()}" th:href="@{${posts.prevUrl}}">上一页</a>
-      <span th:if="${posts.hasPrevious() and posts.hasNext()}">|</span>
-      <a th:if="${posts.hasNext()}" th:href="@{${posts.nextUrl}}">下一页</a>
     </div>
   </th:block>
 </html>

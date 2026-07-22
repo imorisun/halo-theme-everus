@@ -8,7 +8,6 @@ spec:
     name: 晨阳
     website: "https://www.puresky.top"
   description: A dark-themed Halo blog theme with magazine-style homepage, page transitions, and scroll animations. Ported from the original EverUs Typecho theme.
-  logo: ""
   homepage: "https://github.com/imorisun/halo-theme-everus"
   repo: "https://github.com/imorisun/halo-theme-everus"
   issues: "https://github.com/imorisun/halo-theme-everus/issues"

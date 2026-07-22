@@ -15,7 +15,7 @@ jobs:
       contents: write
     with:
       # if you have permission to release to appstore, please set this to false and set the app-id
-      skip-appstore-release: true
+      skip-appstore-release: false
       app-id: app-foo
       pnpm-version: 10
       node-version: 20

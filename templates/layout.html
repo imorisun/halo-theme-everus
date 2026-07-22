@@ -25,6 +25,7 @@
     <link rel="stylesheet" th:href="@{/assets/css/icon.css?v={v}(v=${theme.spec.version})}" />
     <link rel="stylesheet" th:href="@{/assets/css/style.css?v={v}(v=${theme.spec.version})}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" />
+    <link rel="stylesheet" th:href="@{/assets/js/aplayer/APlayer.min.css?v={v}(v=${theme.spec.version})}" />
 
     <!-- Custom font -->
     <th:block th:if="${theme.config.style.custom_font}">
@@ -72,6 +73,9 @@
           </nav>
 
           <div class="site-nav__actions">
+            <button class="music__toggle">
+              <i class="Nug Nug-yinle"></i>
+            </button>
             <button class="huojian__toggle hidden">
               <i class="Nug Nug-huojian"></i>
             </button>
@@ -81,28 +85,64 @@
     </div>
 
     <!-- Main content -->
-    <div id="swup" class="content transition-fade">
+    <div class="content">
       <th:block th:replace="${content}" />
     </div>
 
     <!-- Footer -->
     <footer class="site-footer">
       <div class="footer-content">
-        <div class="footer-copyright" th:text="${#dates.year(#dates.createNow())} + '. 保留所有权利。'"></div>
-        <div class="footer-credit">
-          设计：<a th:href="@{/}" class="text-link" th:text="${site.title}"></a>
+        <h5 class="wuxinghongqi">
+          <svg class="icon" style="width:2.5em;height:2em;vertical-align:middle;fill:currentColor;overflow:hidden" viewBox="0 0 1536 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1536.090316v1024H0z" fill="#F40002"/><path d="M254.690422 104.40501l34.139354 106.93385 112.172164-0.722526-91.038278 65.569237 35.223143 106.572587-90.496383-66.472393-90.496384 66.472393 35.223143-106.572587L108.378903 210.616334l112.172164 0.722526zM477.228435 66.111131l33.958723 14.992415 24.204622-27.997884-3.61263 36.848827 34.139354 14.450521-36.126301 7.947786-3.251367 37.029458L507.75516 117.410478l-36.126301 8.309049 24.565884-27.817251zM591.568178 160.400776l24.565884 27.817252 33.778092-15.173047-18.785677 31.971777 24.927148 27.455989-36.306932-7.947787-18.424414 32.152408-3.61263-36.848827-36.126301-7.767155 33.958723-14.811783zM612.702064 308.699241l10.83789 35.584407 37.21009 0.180631-30.346093 21.314518 11.199154 35.223143-29.623567-22.217675-30.165461 21.675781 12.10231-35.042512-29.984829-22.037044 37.21009 0.541895zM471.990122 429.180455l35.223143 11.379785 21.314518-30.346093 0.180631 37.21009 35.403775 11.018522-35.223143 11.379785 0.361263 37.21009-21.856412-29.98483-35.042512 11.741048 21.67578-29.98483z" fill="#FCEE21"/></svg>
+          爱我中华
+        </h5>
+        <div class="footer-copyright">
+          <th:block th:if="${not #strings.isEmpty(theme.config?.footer?.custom_text)}"
+                    th:text="${theme.config.footer.custom_text}"></th:block>
+          <th:block th:unless="${not #strings.isEmpty(theme.config?.footer?.custom_text)}">
+            © <span th:text="${#dates.year(#dates.createNow())}"></span>. <a class="text-link" th:href="@{/}" th:text="${site.title}"></a> | 记录，即是确认我仍在场。
+          </th:block>
         </div>
+        <a th:if="${not #strings.isEmpty(theme.config?.footer?.icp)}"
+           class="footer-icp"
+           href="https://beian.miit.gov.cn"
+           target="_blank"
+           rel="noopener"
+           th:text="${theme.config.footer.icp}"></a>
       </div>
+      <halo:footer />
     </footer>
+
+    <!-- 音乐播放器 -->
+    <div id="nav-music" class="footer-music">
+      <a id="nav-music-hoverTips"></a>
+      <div id="aplayer-container"></div>
+      <button class="playlist-toggle" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
+        <span class="playlist-toggle__icon"></span>
+      </button>
+      <div class="playlist-panel">
+        <div class="playlist-panel__header">
+          <span>歌单列表</span>
+          <button class="playlist-panel__close"><i class="Nug Nug-guanbi"></i></button>
+        </div>
+        <ul class="playlist-panel__list"></ul>
+      </div>
+      <script th:inline="javascript">
+        window.__MUSIC_CONFIG__ = {
+          customPlaylist: /*[[${theme.config?.music?.custom_playlist}]]*/ null,
+          platformId: /*[[${theme.config?.music?.music_id}]]*/ null,
+          platform: /*[[${theme.config?.music?.platform ?: 'netease'}]]*/ 'netease'
+        };
+      </script>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js"></script>
-    <script src="https://unpkg.com/swup@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-    <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <script th:src="@{/assets/js/aplayer/APlayer.min.js?v={v}(v=${theme.spec.version})}"></script>
+    <script th:src="@{/assets/js/aplayer/Meting2.min.js?v={v}(v=${theme.spec.version})}"></script>
 
     <script th:src="@{/assets/js/main.js?v={v}(v=${theme.spec.version})}"></script>
 

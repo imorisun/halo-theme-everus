@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = null,content = ~{::content})}"
+>
+  <th:block th:fragment="content">
+    <div class="archive-page archive-page--moments">
+
+      <!-- ====== Hero 头部 ====== -->
+      <header class="archive-hero">
+        <div class="archive-hero__bg"></div>
+        <div class="archive-hero__overlay"></div>
+
+        <div class="archive-hero__inner">
+          <nav class="archive-hero__breadcrumb">
+            <a th:href="@{/}">首页</a>
+            <span class="archive-hero__breadcrumb-sep">/</span>
+            <span class="archive-hero__breadcrumb-cur">瞬间</span>
+          </nav>
+
+          <h1 class="archive-hero__title">
+            <span class="archive-hero__kicker">Moments</span>
+            <span th:text="${#lists.isEmpty(param.tag) ? '所有瞬间' : '#' + param.tag[0]}"></span>
+          </h1>
+
+          <div class="archive-hero__meta" th:if="${moments?.total != null}">
+            <span class="hero-badge hero-badge--accent">
+              <i class="Nug Nug-huojian"></i>
+              <span th:text="${moments?.total ?: 0}"></span>
+              <span>条动态</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="archive-hero__fade"></div>
+      </header>
+
+      <!-- ====== 标签筛选 ====== -->
+      <div class="moments-tags" th:if="${tags != null and not tags.isEmpty()}">
+        <a th:href="@{/moments}"
+           th:classappend="${#lists.isEmpty(param.tag) ? 'moments-tags__item--active' : ''}"
+           class="moments-tags__item">全部</a>
+        <a th:each="tag : ${tags}"
+           th:href="|/moments?tag=${tag.name}|"
+           th:classappend="${#lists.contains(param.tag, tag.name) ? 'moments-tags__item--active' : ''}"
+           class="moments-tags__item"
+           th:text="${tag.name} + ' (' + ${tag.momentCount} + ')'"></a>
+      </div>
+
+      <!-- ====== 瞬间列表 ====== -->
+      <div class="cat-group" th:if="${moments?.items != null and not moments.items.isEmpty()}">
+        <ul class="moments-list">
+          <li class="moment-card" th:each="moment : ${moments.items}" th:with="content=${moment?.spec?.content}">
+
+            <!-- 头部：用户信息 + 时间 -->
+            <div class="moment-card__header">
+              <img class="moment-card__avatar"
+                   th:if="${moment?.owner?.avatar}"
+                   th:src="${moment.owner.avatar}"
+                   th:alt="${moment.owner?.displayName}" />
+              <img class="moment-card__avatar"
+                   th:unless="${moment?.owner?.avatar}"
+                   th:src="@{/assets/images/avatar.jpg}"
+                   th:alt="${moment.owner?.displayName ?: '用户'}" />
+              <div class="moment-card__meta">
+                <span class="moment-card__name" th:text="${moment.owner?.displayName ?: '用户'}"></span>
+                <time class="moment-card__time" th:if="${moment.spec?.releaseTime}"
+                      th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}"></time>
+              </div>
+            </div>
+
+            <!-- 正文 -->
+            <div class="moment-card__content" th:if="${content != null}">
+              <div th:if="${not #strings.isEmpty(content?.html)}" th:utext="${content.html}"></div>
+
+              <!-- 媒体 -->
+              <div class="moment-card__media" th:if="${content?.medium != null and not #lists.isEmpty(content.medium)}">
+                <th:block th:each="media : ${content.medium}">
+                  <img th:if="${media?.type?.name() == 'PHOTO'}"
+                       th:src="${media?.url}"
+                       class="moment-card__photo"
+                       loading="lazy" />
+                  <video th:if="${media?.type?.name() == 'VIDEO'}"
+                         th:src="${media?.url}"
+                         class="moment-card__video"
+                         controls></video>
+                </th:block>
+              </div>
+            </div>
+
+            <!-- 互动 -->
+            <div class="moment-card__actions">
+              <button class="moment-card__action moment-card__action--like" th:attr="onclick=|handleMomentUpvote(this, '${moment?.metadata?.name}')|">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span th:attr="data-upvote-moment-name=|${moment?.metadata?.name}|" th:text="${moment?.stats?.upvote ?: 0}"></span>
+              </button>
+              <button class="moment-card__action" th:attr="onclick=|toggleMomentComments('${moment?.metadata?.name}')|">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span th:text="${moment?.stats?.totalComment ?: 0}"></span>
+              </button>
+            </div>
+            <div class="moment-card__comments" th:id="|moment-comments-${moment?.metadata?.name}|">
+              <halo:comment group="moment.halo.run" kind="Moment" th:attr="name=${moment.metadata.name}" />
+            </div>
+          </li>
+        </ul>
+
+        <!-- 分页 -->
+        <nav class="sticky-pagination" th:if="${moments?.hasPrevious() or moments?.hasNext()}">
+          <a th:if="${moments?.hasPrevious()}" th:href="@{${moments?.prevUrl}}" class="sticky-pagination__btn sticky-pagination__btn--prev">
+            <i class="Nug Nug-youbian"></i>
+            <span>上一页</span>
+          </a>
+          <div class="sticky-pagination__dots" th:if="${(moments?.totalPages ?: 0) > 1}">
+            <span th:each="i : ${#numbers.sequence(1, moments?.totalPages ?: 1)}"
+                  th:classappend="${i == (moments?.page ?: 1) ? 'sticky-pagination__dot--active' : ''}"
+                  class="sticky-pagination__dot"></span>
+          </div>
+          <span class="sticky-pagination__text" th:unless="${(moments?.totalPages ?: 0) > 1}"
+                th:text="|${moments?.page ?: 1} / ${moments?.totalPages ?: 1}|"></span>
+          <a th:if="${moments?.hasNext()}" th:href="@{${moments?.nextUrl}}" class="sticky-pagination__btn sticky-pagination__btn--next">
+            <span>下一页</span>
+            <i class="Nug Nug-youbian"></i>
+          </a>
+        </nav>
+      </div>
+
+      <!-- ====== 空状态 ====== -->
+      <div th:unless="${moments?.items != null and not moments.items.isEmpty()}" class="archive-empty">
+        <div class="archive-empty__icon">
+          <i class="Nug Nug-biaoqian"></i>
+        </div>
+        <h2>暂无瞬间</h2>
+        <p>发布第一条瞬间吧。</p>
+      </div>
+    </div>
+  </th:block>
+</html>

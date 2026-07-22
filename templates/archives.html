@@ -32,20 +32,23 @@
         </div>
       </div>
 
-      <div class="page-navigator" th:if="${archives.hasPrevious() or archives.hasNext()}">
-        <div class="pagination-prev" th:if="${archives.hasPrevious()}">
-          <a th:href="@{${archives.prevUrl}}">
-            <i class="Nug Nug-youbian"></i>
-            <span>上一页</span>
-          </a>
+      <nav class="sticky-pagination" th:if="${archives.hasPrevious() or archives.hasNext()}">
+        <a th:if="${archives.hasPrevious()}" th:href="@{${archives.prevUrl}}" class="sticky-pagination__btn sticky-pagination__btn--prev">
+          <i class="Nug Nug-youbian"></i>
+          <span>上一页</span>
+        </a>
+        <div class="sticky-pagination__dots" th:if="${(archives?.totalPages ?: 0) > 1}">
+          <span th:each="i : ${#numbers.sequence(1, archives?.totalPages ?: 1)}"
+                th:classappend="${i == (archives?.page ?: 1) ? 'sticky-pagination__dot--active' : ''}"
+                class="sticky-pagination__dot"></span>
         </div>
-        <div class="pagination-next" th:if="${archives.hasNext()}">
-          <a th:href="@{${archives.nextUrl}}">
-            <span>下一页</span>
-            <i class="Nug Nug-youbian"></i>
-          </a>
-        </div>
-      </div>
+        <span class="sticky-pagination__text" th:unless="${(archives?.totalPages ?: 0) > 1}"
+              th:text="|${archives?.page ?: 1} / ${archives?.totalPages ?: 1}|"></span>
+        <a th:if="${archives.hasNext()}" th:href="@{${archives.nextUrl}}" class="sticky-pagination__btn sticky-pagination__btn--next">
+          <span>下一页</span>
+          <i class="Nug Nug-youbian"></i>
+        </a>
+      </nav>
     </div>
   </th:block>
 </html>

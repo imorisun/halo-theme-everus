@@ -7,15 +7,12 @@ on:
 
 jobs:
   cd:
-    # https://github.com/halo-sigs/reusable-workflows?tab=readme-ov-file#theme
-    uses: halo-sigs/reusable-workflows/.github/workflows/theme-cd.yaml@v3
+    # Suggest using stable branch, tag or sha.
+    uses: halo-sigs/reusable-workflows/.github/workflows/theme-cd.yaml@v4
     secrets:
       halo-pat: ${{ secrets.HALO_PAT }}
     permissions:
       contents: write
     with:
-      # if you have permission to release to appstore, please set this to false and set the app-id
-      skip-appstore-release: false
+      # This is required for releasing to Halo App Store.
       app-id: app-arh6yihs
-      pnpm-version: 10
-      node-version: 20

@@ -136,7 +136,7 @@
               访问 <strong th:text="${stats.visit}">0</strong>
             </span>
             <th:block th:if="${#strings.isEmpty(#authentication.name) or #authentication.name == 'anonymousUser'}">
-              <a class="site-status-panel__login" th:href="@{/console/login}">
+              <a class="site-status-panel__login" th:href="@{/console}">
                 登录
               </a>
             </th:block>

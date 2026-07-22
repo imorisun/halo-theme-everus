@@ -39,6 +39,21 @@ spec:
           value: ""
           help: "仅输入备案号，如：京ICP备2024XXXXXX号-1"
 
+    # ────────── 作者页 ──────────
+    - group: author
+      label: 作者页
+      formSchema:
+        - $formkit: switch
+          name: show_email
+          label: 公开显示邮箱
+          value: true
+          help: "在作者页面侧边栏中显示邮箱信息"
+        - $formkit: switch
+          name: show_phone
+          label: 公开显示手机号
+          value: false
+          help: "在作者页面侧边栏中显示手机号信息"
+
     # ────────── 音乐 ──────────
     - group: music
       label: 音乐播放器

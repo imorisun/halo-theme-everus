@@ -118,12 +118,12 @@
                th:text="${author?.spec?.bio}"></p>
 
             <!-- 联系方式 -->
-            <div class="archive-sidebar__contact" th:if="${not #strings.isEmpty(author?.spec?.email) or not #strings.isEmpty(author?.spec?.phone)}">
-              <div class="archive-sidebar__contact-item" th:if="${not #strings.isEmpty(author?.spec?.email)}">
+            <div class="archive-sidebar__contact" th:if="${(not #strings.isEmpty(author?.spec?.email) and theme.config.author.show_email) or (not #strings.isEmpty(author?.spec?.phone) and theme.config.author.show_phone)}">
+              <div class="archive-sidebar__contact-item" th:if="${not #strings.isEmpty(author?.spec?.email) and theme.config.author.show_email}">
                 <i class="Nug Nug-youjian"></i>
                 <span th:text="${author?.spec?.email}"></span>
               </div>
-              <div class="archive-sidebar__contact-item" th:if="${not #strings.isEmpty(author?.spec?.phone)}">
+              <div class="archive-sidebar__contact-item" th:if="${not #strings.isEmpty(author?.spec?.phone) and theme.config.author.show_phone}">
                 <i class="Nug Nug-shouji"></i>
                 <span th:text="${author?.spec?.phone}"></span>
               </div>

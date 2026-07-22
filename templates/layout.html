@@ -6,8 +6,25 @@
 >
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="keywords" th:content="${site.seo.keywords}" />
+    <meta name="description" th:content="${not #strings.isEmpty(site.seo.description) ? site.seo.description : site.title}" />
+
+    <!-- Open Graph -->
+    <meta property="og:site_name" th:content="${site.title}" />
+    <meta property="og:title" th:content="${site.title}" />
+    <meta property="og:description" th:content="${not #strings.isEmpty(site.seo.description) ? site.seo.description : site.title}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" th:content="${site.url}" />
+    <th:block th:if="${not #strings.isEmpty(site.favicon)}">
+      <meta property="og:image" th:content="${site.favicon}" />
+    </th:block>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" th:content="${site.title}" />
+    <meta name="twitter:description" th:content="${not #strings.isEmpty(site.seo.description) ? site.seo.description : site.title}" />
+
     <th:block th:if="${#strings.isEmpty(site.favicon)}">
       <link rel="shortcut icon" th:href="@{/assets/images/logo.svg}" />
       <link rel="bookmark" th:href="@{/assets/images/logo.svg}" />
@@ -136,7 +153,7 @@
               访问 <strong th:text="${stats.visit}">0</strong>
             </span>
             <th:block th:if="${#strings.isEmpty(#authentication.name) or #authentication.name == 'anonymousUser'}">
-              <a class="site-status-panel__login" th:href="@{/console}">
+              <a class="site-status-panel__login" th:href="@{/console/login(redirect_uri=/console)}">
                 登录
               </a>
             </th:block>
@@ -211,7 +228,5 @@
     <script th:src="@{/assets/js/aplayer/Meting2.min.js?v={v}(v=${theme.spec.version})}"></script>
 
     <script th:src="@{/assets/js/main.js?v={v}(v=${theme.spec.version})}"></script>
-
-    <halo:footer />
   </body>
 </html>

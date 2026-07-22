@@ -274,24 +274,22 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ---------  GSAP Scroll Animations  --------- */
   function animateParagraphs() {
     if (typeof gsap === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     gsap.registerPlugin(ScrollTrigger);
 
-    $('.post__content p, .up').each(function (i, el) {
+    gsap.utils.toArray('.up, .post__content > p').forEach(function (el, i) {
       gsap.fromTo(el, {
         opacity: 0,
-        y: 30,
-        pointerEvents: 'none'
+        y: 30
       }, {
         opacity: 1,
         y: 0,
-        duration: 0.3,
-        delay: i * 0.01,
-        pointerEvents: 'all',
+        duration: 0.4,
+        delay: Math.min(i * 0.01, 0.1),
         scrollTrigger: {
           trigger: el,
-          start: 'top 100%',
-          once: false,
-          toggleActions: 'restart none none reverse'
+          start: 'top 95%',
+          once: true
         }
       });
     });
@@ -389,13 +387,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   })();
 
-  /* ---------  站点状态面板切换（hover 触发）  --------- */
+  /* ---------  站点状态面板切换（hover + tap）  --------- */
   (function () {
     var toggleBtn = document.querySelector('.site-status__toggle');
     var panel = document.getElementById('site-status-panel');
     if (!toggleBtn || !panel) return;
 
     var closeTimer = null;
+    var isTouch = window.matchMedia('(hover: none)').matches;
 
     function openPanel() {
       clearTimeout(closeTimer);
@@ -409,14 +408,33 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function scheduleClose() {
-      closeTimer = setTimeout(closePanel, 150);
+      closeTimer = setTimeout(closePanel, 200);
     }
 
-    toggleBtn.addEventListener('mouseenter', openPanel);
-    panel.addEventListener('mouseenter', openPanel);
-
-    toggleBtn.addEventListener('mouseleave', scheduleClose);
-    panel.addEventListener('mouseleave', scheduleClose);
+    if (isTouch) {
+      // 移动端：点击切换
+      toggleBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (panel.classList.contains('is-open')) {
+          closePanel();
+        } else {
+          openPanel();
+        }
+      });
+      // 点击外部关闭
+      document.addEventListener('click', function (e) {
+        if (panel.classList.contains('is-open') && !panel.contains(e.target) && !toggleBtn.contains(e.target)) {
+          closePanel();
+        }
+      });
+    } else {
+      // 桌面端：hover 触发
+      toggleBtn.addEventListener('mouseenter', openPanel);
+      panel.addEventListener('mouseenter', openPanel);
+      toggleBtn.addEventListener('mouseleave', scheduleClose);
+      panel.addEventListener('mouseleave', scheduleClose);
+    }
 
     // ESC 关闭
     document.addEventListener('keydown', function (e) {

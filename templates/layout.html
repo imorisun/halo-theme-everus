@@ -79,14 +79,14 @@
               <th:block th:if="${menu != null}">
                 <li class="site-nav__dropdown-item" th:each="item : ${menu.menuItems}"
                     th:classappend="${item.children != null and not item.children.isEmpty()} ? 'has-children' : ''">
-                  <a th:href="${item?.status?.href}"
+                  <a th:href="${#strings.isEmpty(item?.status?.href) ? null : item?.status?.href}"
                      class="site-nav__dropdown-link"
                      th:text="${item?.status?.displayName}"
                      th:aria-haspopup="${item.children != null and not item.children.isEmpty() ? 'true' : 'false'}"
                      aria-expanded="false"></a>
                   <ul class="site-nav__submenu" th:if="${item.children != null and not item.children.isEmpty()}" role="menu">
                     <li class="site-nav__submenu-item" th:each="child : ${item.children}" role="none">
-                      <a th:href="${child?.status?.href}"
+                      <a th:href="${#strings.isEmpty(child?.status?.href) ? null : child?.status?.href}"
                          class="site-nav__submenu-link"
                          th:text="${child?.status?.displayName}"
                          role="menuitem"></a>

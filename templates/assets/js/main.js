@@ -471,32 +471,22 @@ function animateParagraphs() {
 }
 
 function setActiveLink() {
-  var currentPath = window.location.pathname + window.location.search;
+  var currentUrl = window.location.href;
   var links = document.querySelectorAll('.site-nav__dropdown-link, .site-nav__submenu-link');
-  // 清理所有激活状态（含 is-expanded，避免切换页面后残留）
   links.forEach(function (link) {
     link.classList.remove('mm-active');
     if (link.parentElement) link.parentElement.classList.remove('mm-active');
+    // 标记空链接，便于 CSS 禁用交互样式
+    var rawHref = link.getAttribute('href');
+    var isEmpty = !rawHref || rawHref === '#' || rawHref === 'javascript:void(0)';
+    link.classList.toggle('is-empty-href', isEmpty);
   });
-  document.querySelectorAll('.site-nav__dropdown-item.has-children').forEach(function (item) {
-    item.classList.remove('is-expanded');
-  });
-  // 标记当前页对应的链接
   links.forEach(function (link) {
-    // 跳过无 URL 或 hash 锚点链接（父级菜单项可能没有 URL，href 为空会被浏览器解析为当前页）
-    var hrefAttr = link.getAttribute('href');
-    if (!hrefAttr || hrefAttr === '#' || hrefAttr.charAt(0) === '#') return;
-    var linkPath;
-    try {
-      var u = new URL(link.href);
-      linkPath = u.pathname + u.search;
-    } catch (e) { return; }
-    if (linkPath === currentPath) {
+    // 跳过空链接：href 为空时浏览器会解析为当前页 URL，导致误激活
+    if (link.classList.contains('is-empty-href')) return;
+    if (link.href === currentUrl) {
       link.classList.add('mm-active');
       if (link.parentElement) link.parentElement.classList.add('mm-active');
-      // 如果是子菜单链接，展开父级
-      var parentItem = link.closest('.site-nav__dropdown-item.has-children');
-      if (parentItem) parentItem.classList.add('is-expanded');
     }
   });
 }
@@ -531,6 +521,12 @@ function initZoomButtons() {
 
     var link = e.target.closest('a');
     if (!link) return;
+    // 空链接：阻止默认跳转（href 为空时浏览器解析为当前页 URL，点击会整页刷新）
+    var rawHref = link.getAttribute('href');
+    if (!rawHref || rawHref === '#' || rawHref === 'javascript:void(0)') {
+      e.preventDefault();
+      return;
+    }
     if (!link.href || link.target === '_blank' || link.hasAttribute('download')) return;
     if (link.hasAttribute('data-no-pjax')) return;
 

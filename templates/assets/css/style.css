@@ -382,6 +382,12 @@ a {
   background: var(--color-primary-alpha-sm);
 }
 
+/* 空链接：不可点击，不显示激活态 */
+.site-nav__dropdown-link.is-empty-href,
+.site-nav__submenu-link.is-empty-href {
+  cursor: default;
+}
+
 /* ========== Site Status Panel ========== */
 .site-status__toggle {
   border: 0;

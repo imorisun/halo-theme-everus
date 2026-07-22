@@ -14,3 +14,4 @@ jobs:
       contents: write
     with:
       app-id: app-arh6yihs
+      pnpm-version: ""

@@ -14,7 +14,7 @@ spec:
   issues: "https://github.com/imorisun/halo-theme-everus/issues"
   settingName: "halo-theme-everus-setting"
   configMapName: "halo-theme-everus-configMap"
-  version: "1.0.0"
+  version: "1.0.4"
   requires: ">=2.19.0"
   license:
     - name: "GPL-3.0"

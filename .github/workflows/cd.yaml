@@ -16,3 +16,4 @@ jobs:
     with:
       # This is required for releasing to Halo App Store.
       app-id: app-arh6yihs
+      pnpm-version: ""

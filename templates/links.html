@@ -38,12 +38,12 @@
       <!-- ====== 分组筛选 ====== -->
       <nav class="link-groups" th:if="${not simpleGroups.isEmpty()}">
         <a class="link-groups__tab"
-           th:classappend="${group == null} ? 'is-active'"
+           th:classappend="${group == null ? 'is-active' : ''}"
            th:href="@{/links}">全部</a>
         <a class="link-groups__tab"
            th:each="item : ${simpleGroups}"
            th:href="@{/links(group=${item.metadata.name})}"
-           th:classappend="${group == item.metadata.name} ? 'is-active'"
+           th:classappend="${group == item.metadata.name ? 'is-active' : ''}"
            th:text="${item.spec.displayName}"></a>
       </nav>
 

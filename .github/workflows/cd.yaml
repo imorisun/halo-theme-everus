@@ -7,13 +7,12 @@ on:
 
 jobs:
   cd:
-    # Suggest using stable branch, tag or sha.
     uses: halo-sigs/reusable-workflows/.github/workflows/theme-cd.yaml@v4
     secrets:
       halo-pat: ${{ secrets.HALO_PAT }}
     permissions:
       contents: write
     with:
-      # This is required for releasing to Halo App Store.
       app-id: app-arh6yihs
       skip-appstore-release: false
+      node-version: 24

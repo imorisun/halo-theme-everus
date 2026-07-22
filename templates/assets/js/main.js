@@ -471,14 +471,27 @@ function animateParagraphs() {
 }
 
 function setActiveLink() {
-  var currentUrl = window.location.href;
+  var currentPath = window.location.pathname + window.location.search;
   var links = document.querySelectorAll('.site-nav__dropdown-link, .site-nav__submenu-link');
+  // 清理所有激活状态（含 is-expanded，避免切换页面后残留）
   links.forEach(function (link) {
     link.classList.remove('mm-active');
     if (link.parentElement) link.parentElement.classList.remove('mm-active');
   });
+  document.querySelectorAll('.site-nav__dropdown-item.has-children').forEach(function (item) {
+    item.classList.remove('is-expanded');
+  });
+  // 标记当前页对应的链接
   links.forEach(function (link) {
-    if (link.href === currentUrl) {
+    // 跳过无 URL 或 hash 锚点链接（父级菜单项可能没有 URL，href 为空会被浏览器解析为当前页）
+    var hrefAttr = link.getAttribute('href');
+    if (!hrefAttr || hrefAttr === '#' || hrefAttr.charAt(0) === '#') return;
+    var linkPath;
+    try {
+      var u = new URL(link.href);
+      linkPath = u.pathname + u.search;
+    } catch (e) { return; }
+    if (linkPath === currentPath) {
       link.classList.add('mm-active');
       if (link.parentElement) link.parentElement.classList.add('mm-active');
       // 如果是子菜单链接，展开父级

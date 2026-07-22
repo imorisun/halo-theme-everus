@@ -79,6 +79,72 @@
             <button class="huojian__toggle hidden">
               <i class="Nug Nug-huojian"></i>
             </button>
+            <button class="site-status__toggle" aria-label="站点状态" title="站点状态">
+              <th:block th:if="${#strings.isEmpty(#authentication.name) or #authentication.name == 'anonymousUser'}">
+                <th:block th:if="${not #strings.isEmpty(site.logo)}">
+                  <img class="site-status__avatar" th:src="${site.logo}" alt="Avatar" />
+                </th:block>
+                <th:block th:unless="${not #strings.isEmpty(site.logo)}">
+                  <span class="site-status__avatar site-status__avatar--default">
+                    <i class="Nug Nug-zuozhe"></i>
+                  </span>
+                </th:block>
+              </th:block>
+              <th:block th:unless="${#strings.isEmpty(#authentication.name) or #authentication.name == 'anonymousUser'}" th:with="contributor=${contributorFinder.getContributor(#authentication.name)}">
+                <img class="site-status__avatar" th:src="${contributor.avatar}" th:alt="${contributor.displayName}" />
+              </th:block>
+            </button>
+          </div>
+        </div>
+
+        <!-- Site Status Panel -->
+        <div class="site-status-panel" id="site-status-panel"
+             th:with="stats=${siteStatsFinder.getStats()}, tagCount=${tagFinder.list(1,1).total}, pageCount=${singlePageFinder.list(1,1).total}">
+          <div class="site-status-panel__header">
+            <span class="site-status-panel__title">站点状态</span>
+            <span class="site-status-panel__site-name" th:text="${site.title}"></span>
+          </div>
+          <div class="site-status-panel__body">
+            <a class="site-status-panel__item site-status-panel__item--link" th:href="@{/archives}">
+              <span class="site-status-panel__label">文章</span>
+              <span class="site-status-panel__value" th:text="${stats.post}">0</span>
+            </a>
+            <div class="site-status-panel__item">
+              <span class="site-status-panel__label">评论</span>
+              <span class="site-status-panel__value" th:text="${stats.comment}">0</span>
+            </div>
+            <a class="site-status-panel__item site-status-panel__item--link" th:href="@{/categories}">
+              <span class="site-status-panel__label">分类</span>
+              <span class="site-status-panel__value" th:text="${stats.category}">0</span>
+            </a>
+            <a class="site-status-panel__item site-status-panel__item--link" th:href="@{/tags}">
+              <span class="site-status-panel__label">标签</span>
+              <span class="site-status-panel__value" th:text="${tagCount}">0</span>
+            </a>
+            <div class="site-status-panel__item">
+              <span class="site-status-panel__label">页面</span>
+              <span class="site-status-panel__value" th:text="${pageCount}">0</span>
+            </div>
+            <div class="site-status-panel__item">
+              <span class="site-status-panel__label">点赞</span>
+              <span class="site-status-panel__value" th:text="${stats.upvote}">0</span>
+            </div>
+          </div>
+          <div class="site-status-panel__footer">
+            <span class="site-status-panel__visit">
+              <i class="Nug Nug-yanjing"></i>
+              访问 <strong th:text="${stats.visit}">0</strong>
+            </span>
+            <th:block th:if="${#strings.isEmpty(#authentication.name) or #authentication.name == 'anonymousUser'}">
+              <a class="site-status-panel__login" th:href="@{/console/login}">
+                登录
+              </a>
+            </th:block>
+            <th:block th:unless="${#strings.isEmpty(#authentication.name) or #authentication.name == 'anonymousUser'}">
+              <a class="site-status-panel__login" th:href="@{/console}">
+                管理
+              </a>
+            </th:block>
           </div>
         </div>
       </div>

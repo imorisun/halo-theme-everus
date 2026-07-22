@@ -388,4 +388,41 @@ document.addEventListener('DOMContentLoaded', function () {
       tabBar.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
   })();
+
+  /* ---------  站点状态面板切换（hover 触发）  --------- */
+  (function () {
+    var toggleBtn = document.querySelector('.site-status__toggle');
+    var panel = document.getElementById('site-status-panel');
+    if (!toggleBtn || !panel) return;
+
+    var closeTimer = null;
+
+    function openPanel() {
+      clearTimeout(closeTimer);
+      panel.classList.add('is-open');
+      toggleBtn.classList.add('is-active');
+    }
+
+    function closePanel() {
+      panel.classList.remove('is-open');
+      toggleBtn.classList.remove('is-active');
+    }
+
+    function scheduleClose() {
+      closeTimer = setTimeout(closePanel, 150);
+    }
+
+    toggleBtn.addEventListener('mouseenter', openPanel);
+    panel.addEventListener('mouseenter', openPanel);
+
+    toggleBtn.addEventListener('mouseleave', scheduleClose);
+    panel.addEventListener('mouseleave', scheduleClose);
+
+    // ESC 关闭
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && panel.classList.contains('is-open')) {
+        closePanel();
+      }
+    });
+  })();
 });

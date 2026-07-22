@@ -7,6 +7,7 @@ spec:
   author:
     name: 晨阳
     website: "https://www.puresky.top"
+  logo: "/themes/halo-theme-everus/assets/images/logo.svg"
   description: 一款暗色系 Halo 博客主题，采用杂志式首页布局、页面过渡效果与滚动动画。从 JaneLens/EverUs Typecho 主题移植并魔改而来。
   homepage: "https://github.com/imorisun/halo-theme-everus"
   repo: "https://github.com/imorisun/halo-theme-everus"

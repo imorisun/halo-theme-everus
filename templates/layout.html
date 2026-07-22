@@ -8,15 +8,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0" />
     <meta name="keywords" th:content="${site.seo.keywords}" />
-    <th:block th:if="${#strings.isEmpty(site.logo)}">
-      <link rel="shortcut icon" th:href="@{/assets/images/favicon.ico}" />
-      <link rel="bookmark" th:href="@{/assets/images/favicon.ico}" />
+    <th:block th:if="${#strings.isEmpty(site.favicon)}">
+      <link rel="shortcut icon" th:href="@{/assets/images/logo.svg}" />
+      <link rel="bookmark" th:href="@{/assets/images/logo.svg}" />
       <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/avatar.jpg}" />
     </th:block>
-    <th:block th:unless="${#strings.isEmpty(site.logo)}">
-      <link rel="shortcut icon" th:href="${site.logo}" />
-      <link rel="bookmark" th:href="${site.logo}" />
-      <link rel="apple-touch-icon" sizes="180x180" th:href="${site.logo}" />
+    <th:block th:unless="${#strings.isEmpty(site.favicon)}">
+      <link rel="shortcut icon" th:href="${site.favicon}" />
+      <link rel="bookmark" th:href="${site.favicon}" />
+      <link rel="apple-touch-icon" sizes="180x180" th:href="${site.favicon}" />
     </th:block>
 
     <title th:text="${site.title}"></title>

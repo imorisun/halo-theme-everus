@@ -14,5 +14,3 @@ jobs:
       contents: write
     with:
       app-id: app-arh6yihs
-      skip-appstore-release: false
-      node-version: 24

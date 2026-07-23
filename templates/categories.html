@@ -31,32 +31,12 @@
       </header>
 
       <!-- ====== 分类卡片网格 ====== -->
-      <div class="categories-masonry" th:if="${categories != null and not categories.isEmpty()}">
-        <article class="category-card" th:each="category : ${categories}">
-          <a th:href="@{${category?.status?.permalink}}" class="category-card__link">
-
-            <!-- 封面 -->
-            <figure class="category-card__cover">
-              <img th:if="${not #strings.isEmpty(category?.spec?.cover)}"
-                   th:src="${category?.spec?.cover}"
-                   th:alt="${category?.spec?.displayName}" loading="lazy" />
-              <img th:unless="${not #strings.isEmpty(category?.spec?.cover)}"
-                   th:src="@{/assets/images/bg.jpg}"
-                   th:alt="${category?.spec?.displayName}" loading="lazy" />
-            </figure>
-
-            <!-- 内容 -->
-            <div class="category-card__body">
-              <h2 class="category-card__name" th:text="${category?.spec?.displayName}"></h2>
-              <p class="category-card__desc line-clamp"
-                 th:if="${not #strings.isEmpty(category?.spec?.description)}"
-                 th:text="${category?.spec?.description}"></p>
-            </div>
-
-            <!-- 角标 -->
-            <span class="category-card__count" th:text="${(category?.postCount ?: 0) + ' 篇'}"></span>
-          </a>
-        </article>
+      <div class="tags-cloud" th:if="${categories != null and not categories.isEmpty()}">
+        <a class="tag-chip" th:each="category : ${categories}"
+           th:href="@{${category?.status?.permalink}}">
+          <span class="tag-chip__name" th:text="${category?.spec?.displayName}"></span>
+          <span class="tag-chip__count" th:text="${category?.postCount ?: 0}"></span>
+        </a>
       </div>
 
       <!-- ====== 空状态 ====== -->

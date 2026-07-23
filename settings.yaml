@@ -38,6 +38,11 @@ spec:
           label: ICP 备案号
           value: ""
           help: "仅输入备案号，如：京ICP备2024XXXXXX号-1"
+        - $formkit: text
+          name: gongan
+          label: 公安备案号
+          value: ""
+          help: "仅输入备案号，如：京公网安备 11010102000001号"
 
     # ────────── 作者页 ──────────
     - group: author

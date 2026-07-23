@@ -1205,9 +1205,8 @@ a {
   gap: 0.5rem;
 }
 
-/* --- Shared Card Styles (post-card / category-card) --- */
-.post-card,
-.category-card {
+/* --- Shared Card Styles (post-card) --- */
+.post-card {
   position: relative;
   background-color: var(--color-bg-base);
   border-radius: 1rem;
@@ -1216,29 +1215,25 @@ a {
   transition: border-color 0.3s, transform 0.3s var(--ease-smooth);
 }
 
-.post-card:hover,
-.category-card:hover {
+.post-card:hover {
   border-color: var(--color-primary-alpha-xl);
   transform: translateY(-3px);
 }
 
-.post-card__link,
-.category-card__link {
+.post-card__link {
   display: block;
   color: inherit;
   text-decoration: none;
 }
 
-.post-card__cover,
-.category-card__cover {
+.post-card__cover {
   position: relative;
   width: 100%;
   overflow: hidden;
   margin: 0;
 }
 
-.post-card__cover img,
-.category-card__cover img {
+.post-card__cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1247,8 +1242,7 @@ a {
   transition: transform 0.5s var(--ease-smooth);
 }
 
-.post-card:hover .post-card__cover img,
-.category-card:hover .category-card__cover img {
+.post-card:hover .post-card__cover img {
   transform: scale(1.06);
 }
 
@@ -1322,62 +1316,7 @@ a {
   --line-clamp: 2;
 }
 
-/* --- Category Card Grid (all categories page) --- */
-.categories-masonry {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
-
-.category-card__cover {
-  aspect-ratio: 16 / 9;
-}
-
-.category-card__body {
-  padding: 1.2rem 1rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.category-card__name {
-  font-size: 1.05em;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  margin: 0;
-  transition: color 0.2s;
-}
-
-.category-card:hover .category-card__name {
-  color: var(--color-primary);
-}
-
-.category-card__desc {
-  font-size: 0.75em;
-  font-weight: 300;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
-  margin: 0;
-  --line-clamp: 2;
-}
-
-.category-card__count {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  background: rgba(18, 18, 18, 0.75);
-  backdrop-filter: blur(0.5rem);
-  color: var(--color-primary);
-  font-size: 0.65em;
-  font-weight: 600;
-  padding: 0.2rem 0.6rem;
-  border-radius: 1rem;
-  letter-spacing: 0.04rem;
-  z-index: 2;
-  border: solid 0.05rem rgba(38, 167, 96, 0.2);
-}
-
-/* --- Tag Cloud (all tags page) --- */
+/* --- Tag Cloud (all tags page, all categories page) --- */
 .tags-cloud {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2736,15 +2675,16 @@ comment-widget {
   color: var(--color-primary);
 }
 
-.footer-icp {
+.footer-beian {
   font-size: 0.9em;
   color: var(--color-text-muted);
   text-align: center;
   text-decoration: none;
   transition: color 0.3s;
+  align-self: center;
 }
 
-.footer-icp:hover {
+.footer-beian:hover {
   color: var(--color-primary);
 }
 
@@ -3118,10 +3058,6 @@ body.music-on .site-footer {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .categories-masonry {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .site-nav__menu .site-nav__dropdown {
     position: fixed;
     top: var(--header-nav, 4rem);
@@ -3157,6 +3093,26 @@ body.music-on .site-footer {
     justify-content: center;
   }
 
+  .site-nav__menu .site-nav__dropdown-item {
+    text-align: center;
+  }
+
+  /* 移动端一级菜单链接 */
+  .site-nav__dropdown-link {
+    display: block;
+    text-align: center;
+    font-size: 1.05em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    padding: 0.7rem 0 0.4rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .site-nav__dropdown-link:hover {
+    color: var(--color-primary);
+  }
+
   .nav-open .site-nav__menu .site-nav__dropdown:before {
     content: '';
     opacity: 1;
@@ -3176,6 +3132,11 @@ body.music-on .site-footer {
     display: none;  /* 移动端无需箭头指示器 */
   }
 
+  .site-nav__dropdown-item.has-children > .site-nav__dropdown-link {
+    display: block;
+    text-align: center;
+  }
+
   .site-nav__submenu {
     position: static;
     transform: none;
@@ -3188,18 +3149,21 @@ body.music-on .site-footer {
     border: none;
     border-radius: 0;
     background: transparent;
-    padding: 0.3rem 0 0.6rem;
+    padding: 0.6rem 0 0.7rem;
     margin: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.15rem;
+    /* 顶部分隔线 */
+    border-top: 1px solid var(--color-border);
+    margin-top: 0.2rem;
   }
 
   .site-nav__submenu-link {
     display: inline-block;
     text-align: center;
-    font-size: 0.65em;
+    font-size: 0.7em;
     font-weight: 400;
     padding: 0.35rem 0.9rem;
     border-radius: 0.35rem;
@@ -3207,11 +3171,31 @@ body.music-on .site-footer {
     color: var(--color-text-tertiary);
     text-decoration: none;
     transition: color 0.2s, background-color 0.2s;
+    position: relative;
+    padding-left: 1.2rem;
+  }
+
+  /* 小圆点指示器 */
+  .site-nav__submenu-link::before {
+    content: '';
+    position: absolute;
+    left: 0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--color-text-tertiary);
+    transition: background 0.2s;
   }
 
   .site-nav__submenu-link:hover {
     color: var(--color-text-primary);
     background: var(--color-primary-alpha-sm);
+  }
+
+  .site-nav__submenu-link:hover::before {
+    background: var(--color-primary);
   }
 
   .links-masonry {
@@ -3445,14 +3429,6 @@ body.music-on .site-footer {
 
   .post-masonry {
     grid-template-columns: repeat(1, 1fr);
-  }
-
-  .categories-masonry {
-    grid-template-columns: repeat(1, 1fr);
-  }
-
-  .category-card__cover {
-    aspect-ratio: 16 / 9;
   }
 
   .tag-chip {

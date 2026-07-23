@@ -198,11 +198,17 @@
           </th:block>
         </div>
         <a th:if="${not #strings.isEmpty(theme.config?.footer?.icp)}"
-           class="footer-icp"
+           class="footer-beian"
            href="https://beian.miit.gov.cn"
            target="_blank"
            rel="noopener"
            th:text="${theme.config.footer.icp}"></a>
+        <a th:if="${not #strings.isEmpty(theme.config?.footer?.gongan)}"
+           class="footer-beian"
+           href="https://beian.mps.gov.cn"
+           target="_blank"
+           rel="noopener"
+           th:text="${theme.config.footer.gongan}"></a>
       </div>
       <halo:footer />
     </footer>

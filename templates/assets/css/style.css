@@ -1552,6 +1552,8 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
+  white-space: nowrap;
   color: var(--color-text-secondary);
   text-decoration: none;
   transition: color 0.2s;
@@ -1571,6 +1573,7 @@ a {
 .sticky-pagination__btn i {
   width: 35px;
   height: 35px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1595,6 +1598,9 @@ a {
   display: flex;
   gap: 0.35rem;
   align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .sticky-pagination__dot {
@@ -2129,6 +2135,550 @@ a {
   scrollbar-width: none;
 }
 
+/* ========== 星度评论组件适配（兼容官方 & 星度两种评论组件） ========== */
+
+/* 星度评论组件自定义元素 */
+comment-widget {
+  display: contents;
+}
+
+/* 评论区域容器 */
+.comment-area,
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* 评论回复表单 */
+.comment-respond {
+  position: relative;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  border: solid 0.1rem var(--color-border);
+}
+
+.comment-respond button.close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--color-text-dim);
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: color var(--transition-fast);
+  width: auto;
+  padding: 0.25rem;
+}
+
+.comment-respond button.close:hover {
+  color: var(--color-text-primary);
+}
+
+.comment-list .comment-respond {
+  margin: 1rem 0 0 2.5rem;
+}
+
+/* 评论标题 */
+.comment-title,
+.comment-num-title,
+.comment-reply-title,
+.comment-form-button {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+}
+
+.comment-reply-title::before,
+.comment-form-button::after {
+  font-family: 'Nug';
+  margin-right: 0.35rem;
+}
+
+.comment-reply-title .comment-meta {
+  font-size: 0.85em;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  text-transform: none;
+}
+
+/* 评论列表项 */
+.comment-list :is(.comment, .pingback) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-list .depth-1 {
+  padding: 1.2rem;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  border: solid 0.1rem var(--color-border);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.comment-list .depth-1:is(:hover, :target) {
+  border-color: var(--color-primary-alpha-xl);
+  background-color: var(--color-bg-elevated);
+}
+
+/* 嵌套评论缩进 */
+.comment-list ul {
+  margin-left: 2rem;
+  padding-left: 1rem;
+  border-left: solid 0.1rem var(--color-border-muted);
+}
+
+/* 星度评论评分区域 */
+.comment-list .comment-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.comment-list .comment-rating time {
+  font-size: 0.72em;
+  color: var(--color-text-dim);
+}
+
+.comment-list .comment[rating] > .comment-body {
+  border-left: solid 3px var(--color-primary);
+  padding-left: 1rem;
+}
+
+.comment-list ul .comment-rating {
+  font-size: 0.9em;
+}
+
+/* 评论主体 */
+.comment-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.comment-list ul .comment-body {
+  font-size: 0.95em;
+}
+
+/* 评论内容 */
+.comment-content p:not(:last-of-type) {
+  margin-bottom: 0.5rem;
+}
+
+.comment-content p {
+  white-space: pre-line;
+  font-size: 0.88em;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+/* 评论作者 */
+.comment-author {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.comment-author .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: solid 0.1rem var(--color-border);
+  flex-shrink: 0;
+}
+
+/* 评论元数据 */
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.72em;
+  color: var(--color-text-dim);
+  flex-wrap: wrap;
+}
+
+.comment-meta a {
+  color: var(--color-text-dim);
+  transition: color var(--transition-fast);
+}
+
+.comment-meta a:hover {
+  color: var(--color-primary);
+}
+
+/* 评论操作链接 */
+.comment-reply-link,
+.comment-edit-link {
+  font-size: 0.75em;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  background: none;
+  border: none;
+  padding: 0.2rem 0.4rem;
+}
+
+.comment-reply-link:hover,
+.comment-edit-link:hover {
+  color: var(--color-primary);
+}
+
+.comment-reply-link::before {
+  content: "\2192";
+  margin-right: 0.25rem;
+}
+
+.comment-edit-link::before {
+  content: "\270E";
+  margin-right: 0.25rem;
+}
+
+/* 评论表单 */
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.comment-form :where(p) {
+  margin: 0;
+}
+
+/* 评论表单信息行 */
+.comment-form-info {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.comment-form-info label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.72em;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04rem;
+}
+
+.comment-form-info input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  background: var(--color-bg-base);
+  border: solid 0.1rem var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: 0.9em;
+  transition: border-color var(--transition-fast);
+}
+
+.comment-form-info input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.comment-form-info input:is(:-internal-autofill-previewed, :-internal-autofill-selected) {
+  -webkit-text-fill-color: var(--color-text-primary);
+  box-shadow: 0 0 0px 1000px var(--color-bg-base) inset;
+}
+
+/* 评论文本域 */
+.comment-form-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.comment-form-comment {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.8rem 1rem;
+  background: var(--color-bg-base);
+  border: solid 0.1rem var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: 0.88em;
+  line-height: 1.7;
+  resize: vertical;
+  transition: border-color var(--transition-fast);
+  font-family: inherit;
+}
+
+.comment-form-comment:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+/* 表情选择器 */
+.comment-emoji {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.comment-emoji .emoji-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-base);
+  border: solid 0.1rem var(--color-border);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.comment-emoji .emoji-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary-alpha);
+}
+
+.comment-emoji .emoji-icons {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.3rem;
+  padding: 0.75rem;
+  background: var(--color-bg-card);
+  border: solid 0.1rem var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  max-height: 200px;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.5rem);
+  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+  z-index: 20;
+  scrollbar-width: thin;
+}
+
+.comment-emoji.show .emoji-icons {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.comment-emoji i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3em;
+  padding: 0.25rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  font-style: normal;
+}
+
+.comment-emoji i:hover {
+  background-color: var(--color-primary-alpha-sm);
+  transform: scale(1.15);
+}
+
+.comment-emoji i:hover:active {
+  transform: scale(0.95);
+}
+
+/* 提交按钮 */
+.comment-form .form-submit {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.comment-form .form-submit button,
+.comment-form .form-submit input[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  background: var(--color-primary);
+  color: var(--color-bg-page);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.82em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  letter-spacing: 0.04rem;
+  width: auto;
+}
+
+.comment-form .form-submit button:hover,
+.comment-form .form-submit input[type="submit"]:hover {
+  background: var(--color-primary-hover);
+}
+
+.comment-form .form-submit button:active,
+.comment-form .form-submit input[type="submit"]:active {
+  transform: scale(0.97);
+}
+
+.comment-form .form-submit button:disabled,
+.comment-form .form-submit input[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Turnstile 验证 */
+.comment-form .cf-turnstile {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.comment-form .cf-turnstile div {
+  display: inline-flex;
+}
+
+/* 评论已关闭提示 */
+.comment-disbtn {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--color-text-tertiary);
+  font-size: 0.85em;
+  font-weight: 500;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  border: solid 0.1rem var(--color-border);
+  letter-spacing: 0.04rem;
+}
+
+/* 评论开关图标 */
+#comment-enable:checked + .submit-enable-icon:before {
+  content: "\2713";
+}
+
+/* 评论说明与Cookie */
+.comment-notes,
+.comment-form label {
+  font-size: 0.72em;
+  color: var(--color-text-tertiary);
+}
+
+.comment-form-cookies-consent {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72em;
+  color: var(--color-text-tertiary);
+}
+
+/* 评论分页 */
+.comment-next {
+  text-align: center;
+  margin-top: 1.2rem;
+}
+
+/* 评论评分星星 */
+.comment-list .comment-rating .star {
+  color: var(--color-primary);
+  font-size: 0.75em;
+}
+
+/* 星度评论组件表单按钮 */
+.comment-form-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.2rem;
+  background: var(--color-primary);
+  color: var(--color-bg-page);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.82em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.comment-form-button:hover {
+  background: var(--color-primary-hover);
+}
+
+/* 评论回复登录提示 */
+.comment-reply-login::before,
+.comment-reply-link::before {
+  font-family: 'Nug';
+  margin-right: 0.3rem;
+}
+
+/* ========== 评论组件暗色模式 CSS 变量覆盖 ========== */
+/* 确保官方评论组件和星度评论组件在暗色模式下正确显示 */
+.comment-area,
+.comment-list,
+.comment-respond,
+#aside-comment {
+  color: var(--color-text-secondary);
+}
+
+.comment-area input,
+.comment-area textarea,
+.comment-area select,
+.comment-list input,
+.comment-list textarea,
+.comment-list select,
+.comment-respond input,
+.comment-respond textarea,
+.comment-respond select {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.comment-area input:focus,
+.comment-area textarea:focus,
+.comment-list input:focus,
+.comment-list textarea:focus,
+.comment-respond input:focus,
+.comment-respond textarea:focus {
+  border-color: var(--color-primary);
+}
+
+/* 星度评论组件按钮通用样式 */
+.comment-respond button:not(.close),
+.comment-list button {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border: solid 0.1rem var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+  width: auto;
+}
+
+.comment-respond button:not(.close):hover,
+.comment-list button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 /* 结语引用 */
 .cat__quote {
   font-size: 0.75em;
@@ -2631,7 +3181,6 @@ body.music-on .site-footer {
     transform: none;
     opacity: 1;
     visibility: visible;
-    pointer-events: auto;
     max-height: none;
     overflow: visible;
     min-width: 0;
@@ -3093,5 +3642,101 @@ body.music-on .site-footer {
 
   .site-status-panel__footer {
     padding: 0.4rem 0.85rem;
+  }
+
+  /* 评论组件移动端适配 */
+  .comment-form-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .comment-form-info label {
+    flex: none;
+    width: 100%;
+  }
+
+  .comment-list .comment-respond {
+    margin: 0.75rem 0 0 0;
+  }
+
+  .comment-list ul {
+    margin-left: 0.75rem;
+    padding-left: 0.5rem;
+  }
+
+  .comment-respond {
+    padding: 1rem;
+  }
+
+  .comment-list .depth-1 {
+    padding: 0.8rem;
+  }
+
+  .comment-author .avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .comment-title,
+  .comment-num-title,
+  .comment-reply-title {
+    font-size: 0.8em;
+  }
+
+  .comment-content p {
+    font-size: 0.82em;
+  }
+
+  .comment-form .form-submit button,
+  .comment-form .form-submit input[type="submit"] {
+    padding: 0.5rem 1rem;
+    font-size: 0.78em;
+  }
+
+  .comment-form-comment {
+    min-height: 100px;
+  }
+
+  .comment-emoji .emoji-icons {
+    grid-template-columns: repeat(6, 1fr);
+    left: auto;
+    right: 0;
+  }
+
+  /* 分页组件移动端适配 */
+  .sticky-pagination {
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.75rem;
+  }
+
+  .sticky-pagination__btn {
+    gap: 0.3rem;
+  }
+
+  .sticky-pagination__btn i {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  .sticky-pagination__btn span {
+    font-size: 0.68em;
+  }
+
+  .sticky-pagination__dots {
+    gap: 0.2rem;
+  }
+
+  .sticky-pagination__dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .sticky-pagination__dot--active {
+    width: 14px;
+  }
+
+  .sticky-pagination__text {
+    font-size: 0.65em;
   }
 }

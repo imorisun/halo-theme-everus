@@ -29,12 +29,7 @@
 
           <!-- Comments -->
           <div class="page-comments">
-            <div th:if="${haloCommentEnabled}">
-              <halo:comment group="content.halo.run" kind="SinglePage" th:attr="name=${singlePage.metadata.name}" />
-            </div>
-            <div th:unless="${haloCommentEnabled}" class="empty-state">
-              评论未开启
-            </div>
+            <th:block th:replace="~{modules/widgets/comment :: comment(post_name=${singlePage.metadata.name},kind='SinglePage',group='content.halo.run')}"></th:block>
           </div>
         </div>
       </div>

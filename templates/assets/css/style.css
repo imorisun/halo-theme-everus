@@ -2735,6 +2735,26 @@ comment-widget {
 }
 
 /* ========== 音乐播放器 ========== */
+
+/* 音乐播放器展开按钮 */
+.music__toggle {
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.music__toggle:hover {
+  color: var(--color-text-primary);
+}
+
+/* 展开态：按钮变为主题色 */
+body.music-on .music__toggle {
+  color: var(--color-primary);
+}
+
+body.music-on .music__toggle:hover {
+  color: var(--color-primary-hover);
+}
+
 .footer-music {
   position: sticky;
   z-index: 9;

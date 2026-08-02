@@ -117,23 +117,7 @@
         </ul>
 
         <!-- 分页 -->
-        <nav class="sticky-pagination" th:if="${moments?.hasPrevious() or moments?.hasNext()}">
-          <a th:if="${moments?.hasPrevious()}" th:href="@{${moments?.prevUrl}}" class="sticky-pagination__btn sticky-pagination__btn--prev">
-            <i class="Nug Nug-youbian"></i>
-            <span>上一页</span>
-          </a>
-          <div class="sticky-pagination__dots" th:if="${(moments?.totalPages ?: 0) > 1}">
-            <span th:each="i : ${#numbers.sequence(1, moments?.totalPages ?: 1)}"
-                  th:classappend="${i == (moments?.page ?: 1) ? 'sticky-pagination__dot--active' : ''}"
-                  class="sticky-pagination__dot"></span>
-          </div>
-          <span class="sticky-pagination__text" th:unless="${(moments?.totalPages ?: 0) > 1}"
-                th:text="|${moments?.page ?: 1} / ${moments?.totalPages ?: 1}|"></span>
-          <a th:if="${moments?.hasNext()}" th:href="@{${moments?.nextUrl}}" class="sticky-pagination__btn sticky-pagination__btn--next">
-            <span>下一页</span>
-            <i class="Nug Nug-youbian"></i>
-          </a>
-        </nav>
+        <th:block th:replace="~{modules/pagination :: pagination(posts=${moments})}"></th:block>
       </div>
 
       <!-- ====== 空状态 ====== -->

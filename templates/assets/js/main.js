@@ -283,47 +283,62 @@ function initLayoutOnce() {
   if (window.__everusLayoutReady) return;
   window.__everusLayoutReady = true;
 
-  (function ($) {
-    /* ---------  Scroll Box (Back to top)  --------- */
-    $('.huojian__toggle').click(function () {
-      $('html,body').animate({ scrollTop: 0 }, 500, function () {
-        $('body').removeClass('nav-fixed');
-      });
+  /* ---------  Scroll Box (Back to top)  --------- */
+  var huojianBtn = document.querySelector('.huojian__toggle');
+  if (huojianBtn) {
+    huojianBtn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.classList.remove('nav-fixed');
     });
+  }
 
-    $(window).on('scroll', function () {
-      var fromTop = $(window).scrollTop();
-      if (fromTop > 50) {
-        $('.huojian__toggle').removeClass('hidden');
-        $('body').addClass('nav-fixed');
-      } else {
-        $('.huojian__toggle').addClass('hidden');
-        $('body').removeClass('nav-fixed');
+  var scrollTicking = false;
+  window.addEventListener('scroll', function () {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(function () {
+      var fromTop = window.scrollY;
+      var btn = document.querySelector('.huojian__toggle');
+      if (btn) {
+        if (fromTop > 50) {
+          btn.classList.remove('hidden');
+          document.body.classList.add('nav-fixed');
+        } else {
+          btn.classList.add('hidden');
+          document.body.classList.remove('nav-fixed');
+        }
       }
+      scrollTicking = false;
     });
+  }, { passive: true });
 
-    /* ---------  Nav toggle (mobile)  --------- */
-    $('.daohang').on('click', function (e) {
-      $('body').toggleClass('nav-open');
+  /* ---------  Nav toggle (mobile)  --------- */
+  var daohang = document.querySelector('.daohang');
+  if (daohang) {
+    daohang.addEventListener('click', function (e) {
+      document.body.classList.toggle('nav-open');
     });
-    $('body').removeClass('nav-open');
+    document.body.classList.remove('nav-open');
+  }
 
-    // 点击导航链接关闭移动端菜单
-    // 有子菜单的父项 → 不关闭（由手风琴逻辑控制）
-    // 子菜单链接 / 普通链接 → 关闭 overlay
-    $(document).on('click', '.site-nav a', function (e) {
-      var parentItem = this.closest('.has-children');
-      if (parentItem && parentItem.querySelector('.site-nav__submenu')) {
-        return;
-      }
-      $('body').removeClass('nav-open');
-    });
+  // 点击导航链接关闭移动端菜单
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('.site-nav a');
+    if (!link) return;
+    var parentItem = link.closest('.has-children');
+    if (parentItem && parentItem.querySelector('.site-nav__submenu')) {
+      return;
+    }
+    document.body.classList.remove('nav-open');
+  });
 
-    /* ---------  Music toggle  --------- */
-    $('.music__toggle').on('click', function () {
-      $('body').toggleClass('music-on');
+  /* ---------  Music toggle  --------- */
+  var musicToggle = document.querySelector('.music__toggle');
+  if (musicToggle) {
+    musicToggle.addEventListener('click', function () {
+      document.body.classList.toggle('music-on');
     });
-  })(jQuery);
+  }
 
   /* ---------  二级菜单键盘导航（布局元素，仅绑定一次）  --------- */
   (function () {
@@ -649,8 +664,11 @@ function setActiveLink() {
 
     var container = document.getElementById(CONTAINER_ID);
 
-    // 淡出 + 并行 fetch
-    if (container) container.classList.add('is-leaving');
+    // 淡出 + 加载指示器 + 并行 fetch
+    if (container) {
+      container.classList.add('is-leaving');
+      container.classList.add('is-loading');
+    }
 
     Promise.all([
       fetch(url).then(function (r) {
@@ -739,6 +757,7 @@ function setActiveLink() {
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           container.classList.remove('is-leaving');
+          container.classList.remove('is-loading');
           isNavigating = false;
           // 刷新 ScrollTrigger 位置
           if (typeof ScrollTrigger !== 'undefined') {
@@ -747,7 +766,8 @@ function setActiveLink() {
         });
       });
     }).catch(function () {
-      // 任何错误 → 回退到正常跳转
+      // 任何错误 → 回退到正常跳转，同时移除加载状态
+      if (container) container.classList.remove('is-loading');
       window.location.href = url;
     });
   }

@@ -9,15 +9,10 @@
         <div class="page-img_content">
           <!-- 文章头图 -->
           <header class="post-images" th:unless="${#strings.isEmpty(post?.spec?.cover)}">
-            <div class="gallery-item work-card">
-              <a th:href="${post?.spec?.cover}" data-fancybox="gallery">
+            <div class="gallery-item">
+              <a class="post-cover" th:href="${post?.spec?.cover}" data-fancybox="gallery" data-type="image">
                 <img th:src="${post?.spec?.cover}" th:alt="${post?.spec?.title}" />
               </a>
-              <div class="mil-descr">
-                <a class="zoom">
-                  <button class="Nug Nug-zhankai2 zoom" type="button"></button>
-                </a>
-              </div>
             </div>
           </header>
 

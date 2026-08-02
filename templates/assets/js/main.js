@@ -402,17 +402,66 @@ function initLayoutOnce() {
   /* ---------  Fancybox 全局委托绑定（一次即可）  --------- */
   if (typeof Fancybox !== 'undefined') {
     try {
-      Fancybox.bind("[data-fancybox='gallery']", {
-        hideScrollbar: false,
-        idle: false,
-        Carousel: {
-          transition: 'slide'
+      Fancybox.bind(
+        "[data-fancybox='gallery'], [data-fancybox='post-gallery'], [data-fancybox^='moment-gallery']",
+        {
+          hideScrollbar: false,
+          idle: false,
+          Hash: false, /* 禁用 URL 深链，避免关闭时 history.back 触发 PJAX popstate 导致页面重载 */
+          Carousel: {
+            transition: 'slide',
+            Navigation: { arrows: true }
+          },
+          Toolbar: {
+            absolute: true,
+            enabled: true,
+            display: {
+              left: ['infobar'],
+              middle: ['prev', 'next', 'zoomIn', 'zoomOut', 'flipX', 'flipY'],
+              right: ['rotateCCW', 'rotateCW', 'toggle1to1', 'download', 'fullscreen', 'thumbs', 'close']
+            }
+          }
         }
-      });
+      );
     } catch (e) {
-      console.warn('Fancybox bind failed:', e);
+      console.warn('[EverUs] Fancybox bind failed:', e);
     }
+  } else {
+    console.warn('[EverUs] Fancybox not loaded — image lightbox unavailable');
   }
+}
+
+/* ==========  文章正文图片：自动包裹 Fancybox 链接  ========== */
+function wrapContentImages() {
+  var containers = document.querySelectorAll('.post__content');
+  if (!containers.length) return;
+
+  containers.forEach(function (container) {
+    container.querySelectorAll('img:not([data-fancybox-img])').forEach(function (img) {
+      if (img.parentElement && img.parentElement.tagName === 'A') return;
+      var w = parseInt(img.getAttribute('width'), 10);
+      var h = parseInt(img.getAttribute('height'), 10);
+      if ((!isNaN(w) && w < 50) || (!isNaN(h) && h < 50)) {
+        img.setAttribute('data-fancybox-img', '1');
+        return;
+      }
+
+      var src = img.getAttribute('src') || img.currentSrc;
+      if (!src) return;
+
+      var link = document.createElement('a');
+      link.href = src;
+      link.setAttribute('data-fancybox', 'post-gallery');
+      link.setAttribute('data-type', 'image');
+      link.setAttribute('data-caption', img.getAttribute('alt') || '');
+
+      img.setAttribute('data-fancybox-img', '1');
+      if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
+
+      img.parentElement.insertBefore(link, img);
+      link.appendChild(img);
+    });
+  });
 }
 
 /* ==========  页面级初始化（每次页面加载时执行）  ========== */
@@ -423,8 +472,8 @@ function initPageContent() {
   /* ---------  Active link in nav  --------- */
   setActiveLink();
 
-  /* ---------  Fancybox .zoom 按钮委托（每页重新绑定）  --------- */
-  initZoomButtons();
+  /* ---------  文章正文图片自动包裹 Fancybox 链接（PJAX 后重跑）  --------- */
+  wrapContentImages();
 
   /* ---------  初始化瞬间点赞状态  --------- */
   initMomentUpvotes();
@@ -491,20 +540,6 @@ function setActiveLink() {
   });
 }
 
-function initZoomButtons() {
-  if (typeof Fancybox === 'undefined') return;
-  document.querySelectorAll('.zoom').forEach(function (button) {
-    if (button.dataset.everusZoom) return;
-    button.dataset.everusZoom = '1';
-    button.addEventListener('click', function (event) {
-      event.preventDefault();
-      var parentCard = button.closest('.work-card');
-      var image = parentCard ? parentCard.querySelector('a[data-fancybox="gallery"]') : null;
-      if (image) image.click();
-    });
-  });
-}
-
 /* ==========  PJAX 页面过渡  ========== */
 // 原理：点击内部链接 → 淡出内容 → AJAX 拉取新页面 → 替换内容 + 重新执行脚本 → 淡入。
 // 与 swup 的关键区别：PJAX 手动重新执行新内容中的所有 <script>，确保评论组件等正常初始化。
@@ -529,6 +564,8 @@ function initZoomButtons() {
     }
     if (!link.href || link.target === '_blank' || link.hasAttribute('download')) return;
     if (link.hasAttribute('data-no-pjax')) return;
+    // Fancybox 图片链接交由 Fancybox 处理，PJAX 不得拦截
+    if (link.hasAttribute('data-fancybox')) return;
 
     var url;
     try { url = new URL(link.href, window.location.origin); } catch (err) { return; }
@@ -547,6 +584,8 @@ function initZoomButtons() {
   // 浏览器后退/前进
   window.addEventListener('popstate', function () {
     if (isNavigating) return;
+    // Fancybox 关闭时可能触发 popstate，跳过以免 PJAX 重新加载页面
+    if (document.querySelector('.fancybox__container')) return;
     navigateTo(location.href, true);
   });
 

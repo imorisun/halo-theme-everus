@@ -119,7 +119,12 @@
                 </th:block>
               </th:block>
               <th:block th:unless="${#strings.isEmpty(#authentication.name) or #authentication.name == 'anonymousUser'}" th:with="contributor=${contributorFinder.getContributor(#authentication.name)}">
-                <img class="site-status__avatar" th:src="${contributor.avatar}" th:alt="${contributor.displayName}" />
+                <th:block th:if="${not #strings.isEmpty(contributor.avatar)}">
+                  <img class="site-status__avatar" th:src="${contributor.avatar}" th:alt="${contributor.displayName}" />
+                </th:block>
+                <th:block th:unless="${not #strings.isEmpty(contributor.avatar)}" th:with="initial=${#strings.substring(contributor.displayName, 0, 1)}">
+                  <span class="site-status__avatar site-status__avatar--letter" th:text="${initial}" th:aria-label="${contributor.displayName}"></span>
+                </th:block>
               </th:block>
             </button>
           </div>

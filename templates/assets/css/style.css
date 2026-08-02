@@ -454,6 +454,20 @@ a {
   line-height: 1;
 }
 
+/* 默认头像：昵称首字母兜底 */
+.site-status__avatar--letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary, #26a760);
+  color: #fff;
+  font-size: 0.82em;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+  user-select: none;
+}
+
 /* 面板容器 */
 .site-status-panel {
   position: absolute;
@@ -638,10 +652,6 @@ a {
 .post-content .post-images {
   position: relative;
   margin-block-end: 0.5rem;
-}
-
-.post-content .post-images .gallery-item {
-  position: relative;
 }
 
 .post-content .post-images .gallery-item::before {
@@ -962,60 +972,79 @@ a {
   list-style: none;
 }
 
-.work-card {
+/* 文章头图链接 */
+.post-cover {
+  display: block;
   position: relative;
-}
-
-.page-main .gallery-item .mil-descr {
-  position: absolute;
-  opacity: 0;
-  top: 1rem;
-  right: 1rem;
-  width: 35px;
-  height: 35px;
-  line-height: 1;
-  z-index: 1;
-  border-radius: 50%;
-  display: flex;
-  color: var(--color-text-secondary);
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(224, 224, 224, 0.1);
-  transition: 0.2s;
-  transform: translateY(-1rem) scale(0.5);
-}
-
-.page-main .gallery-item .mil-descr button {
-  background: none;
-  border: 0;
-  cursor: pointer;
-  color: inherit;
-  font-size: 1.3rem;
-  transition: 0.2s var(--ease-out);
-}
-
-.page-main .gallery-item .mil-descr:hover {
-  color: var(--color-text-primary) !important;
-  background-color: rgba(224, 224, 224, 0.2) !important;
-}
-
-.page-main .gallery-item:hover .mil-descr {
-  opacity: 1;
-  transform: none;
-}
-
-.page-main .gallery-item:hover img {
-  transform: scale(1);
+  overflow: hidden;
+  border-radius: 1rem;
 }
 
 .page-content .post .post__content img {
+  display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   border-radius: 1rem;
-  object-fit: cover;
-  object-position: center;
+  transition: transform 0.4s var(--ease-out), filter 0.3s var(--ease-out);
+}
+
+/* ========== 文章正文图片：Fancybox 链接容器 + 2rem 间距 + 绿色放大镜 hover ========== */
+.page-content .post .post__content a[data-fancybox] {
+  display: block;
+  position: relative;
+  margin-bottom: 2rem; /* UI 规范：文章图片间距 = 2rem */
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+/* ========== 图片 hover 放大镜图标（封面 / 正文 / 瞬间 / 首页动态 统一） ========== */
+.post-cover::before,
+.page-content .post .post__content a[data-fancybox]::before,
+.moment-card__photo-link::before,
+.home-moment__photo-link::before {
+  content: "\e701";
+  font-family: "Nugfont" !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(38, 167, 96, 0.85);
+  color: #fff;
+  line-height: 1;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.5);
+  transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+  pointer-events: none;
+}
+
+.post-cover::before,
+.page-content .post .post__content a[data-fancybox]::before {
+  width: 48px;
+  height: 48px;
+  font-size: 1.4rem;
+}
+
+.moment-card__photo-link::before,
+.home-moment__photo-link::before {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+}
+
+.post-cover:hover::before,
+.page-content .post .post__content a[data-fancybox]:hover::before,
+.moment-card__photo-link:hover::before,
+.home-moment__photo-link:hover::before {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.page-content .post .post__content a[data-fancybox]:hover img {
   transform: scale(1.02);
-  transition: 0.4s var(--ease-out);
 }
 
 .page-content .post .post__content a {
@@ -1844,17 +1873,26 @@ a {
   padding-left: 2rem;
 }
 
-.home-moment__photo {
+.home-moment__photo-link {
+  display: block;
+  position: relative;
   width: calc(33.333% - 0.34rem);
   max-width: 120px;
   aspect-ratio: 1;
-  object-fit: cover;
+  overflow: hidden;
   border-radius: 0.25rem;
-  transition: opacity 0.3s;
 }
 
-.home-moment__photo:hover {
-  opacity: 0.75;
+.home-moment__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s var(--ease-out), filter 0.3s var(--ease-out);
+}
+
+.home-moment__photo-link:hover .home-moment__photo {
+  transform: scale(1.04);
+  filter: brightness(0.92);
 }
 
 .home-moment__actions {
@@ -2036,17 +2074,25 @@ a {
   margin-top: 1rem;
 }
 
+.moment-card__photo-link {
+  display: block;
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
 .moment-card__photo {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 0.5rem;
-  cursor: pointer;
-  transition: opacity 0.3s;
+  transition: transform 0.3s var(--ease-out), filter 0.3s var(--ease-out);
 }
 
-.moment-card__photo:hover {
-  opacity: 0.85;
+.moment-card__photo-link:hover .moment-card__photo {
+  transform: scale(1.04);
+  filter: brightness(0.92);
 }
 
 .moment-card__video {
@@ -3204,6 +3250,202 @@ body.music-on .site-footer {
   }
   .link-groups {
     max-width: 50rem;
+  }
+}
+
+/* ========== Fancybox v5 暗色主题 + 主题绿 (#26a760) 强调色 ==========
+   关键点（来自项目工程约定）：
+   1. z-index 范围 99998-100000，避免被其他弹层遮挡
+   2. 必须在 .fancybox__toolbar 选择器上覆盖 --f-button-* 变量
+      （.fancybox__container 上的同名变量会被 .fancybox__toolbar 自身覆盖）
+   3. .is-idle 状态会通过 CSS 动画隐藏工具栏，需 CSS 保险
+   4. 工具栏容器默认 pointer-events: none（让空白点击穿透），不可改为 auto
+=================================================================== */
+
+.fancybox__container {
+  --fancybox-bg: rgba(17, 17, 17, 0.92);
+  --f-accent: 38, 167, 96; /* #26a760 */
+  --f-accent-color: #26a760;
+  z-index: 99998;
+}
+
+.fancybox__backdrop {
+  background: var(--fancybox-bg);
+}
+
+/* 工具栏：覆盖按钮变量（必须放在 .fancybox__toolbar 上） */
+.fancybox__toolbar {
+  --f-button-bg: rgba(24, 24, 27, 0.65);
+  --f-button-bg-hover: rgba(38, 167, 96, 0.85);
+  --f-button-icon-color: rgba(255, 255, 255, 0.85);
+  --f-button-icon-color-hover: #ffffff;
+  --f-button-color: #ffffff;
+  --f-button-color-hover: #ffffff;
+  --f-button-width: 44px;
+  --f-button-height: 44px;
+  --f-button-border-radius: 0.5rem;
+  --f-button-svg-width: 22px;
+  --f-button-svg-height: 22px;
+  --f-button-svg-stroke-width: 2;
+  --f-button-svg-fill: none;
+  --f-button-svg-disabled-opacity: 0.35;
+  padding: 0.5rem 0.75rem;
+  z-index: 99999;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* 按钮通用交互反馈：hover 高亮 + active 按压 + 平滑过渡 */
+.fancybox__toolbar .f-button {
+  transition: background-color 0.2s var(--ease-out),
+              color 0.2s var(--ease-out),
+              transform 0.1s var(--ease-out),
+              opacity 0.2s var(--ease-out);
+}
+
+.fancybox__toolbar .f-button.is-hovered,
+.fancybox__toolbar .f-button:hover {
+  background-color: rgba(38, 167, 96, 0.85) !important;
+  color: #ffffff !important;
+}
+
+.fancybox__toolbar .f-button:active {
+  transform: scale(0.9);
+}
+
+/* 键盘聚焦可见性（无障碍） */
+.fancybox__toolbar .f-button:focus-visible {
+  outline: 2px solid #26a760;
+  outline-offset: 2px;
+}
+
+/* 禁用态：明显降低不透明度 */
+.fancybox__toolbar .f-button[aria-disabled="true"],
+.fancybox__toolbar .f-button.is-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* 关闭按钮：hover 红色强调，视觉层次区分 */
+.fancybox__toolbar .f-button.is-close-btn,
+.fancybox__toolbar [data-fancybox-close] {
+  margin-left: 0.25rem;
+}
+
+.fancybox__toolbar .f-button.is-close-btn:hover,
+.fancybox__toolbar [data-fancybox-close]:hover {
+  background-color: rgba(229, 62, 62, 0.85) !important;
+  color: #ffffff !important;
+}
+
+/* 按钮组之间视觉分隔（left / middle / right 三列） */
+.fancybox__toolbar > div:not(:first-child):not(:last-child) {
+  margin: 0 0.5rem;
+}
+
+/* 顶部信息栏 */
+.fancybox__infobar {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(24, 24, 27, 0.55);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85em;
+}
+
+/* 防止 is-idle 状态隐藏工具栏（animation:none 即可，无需强制 opacity 以免关闭时不跟随淡出） */
+.is-idle .fancybox__toolbar {
+  animation: none !important;
+  pointer-events: none;
+}
+
+.is-idle .fancybox__toolbar .f-button {
+  pointer-events: all;
+}
+
+/* 关闭时平滑淡出，避免闪烁 */
+.fancybox__container.is-closing {
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+/* 导航箭头（左右切换） */
+.fancybox__carousel .fancybox__slide--navigation .f-button,
+.fancybox__navigation .f-button {
+  background: rgba(24, 24, 27, 0.55);
+  color: #ffffff;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  z-index: 100000;
+  transition: background-color 0.2s var(--ease-out), transform 0.1s var(--ease-out);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.fancybox__carousel .fancybox__slide--navigation .f-button:hover,
+.fancybox__navigation .f-button:hover {
+  background-color: rgba(38, 167, 96, 0.85);
+}
+
+.fancybox__carousel .fancybox__slide--navigation .f-button:active,
+.fancybox__navigation .f-button:active {
+  transform: scale(0.9);
+}
+
+/* 缩略图条 */
+.fancybox__thumbs {
+  --f-thumb-width: 80px;
+  --f-thumb-height: 60px;
+  --f-thumb-border-radius: 0.35rem;
+  --f-thumb-outline-color: rgba(38, 167, 96, 0.9);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.5rem;
+  z-index: 99999;
+}
+
+.fancybox__thumbs .is-active {
+  --f-thumb-outline-color: #26a760;
+}
+
+/* 图片本身 */
+.fancybox__slide {
+  padding: 1.5rem;
+}
+
+.fancybox__image {
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* 加载图标 */
+.fancybox__spinner {
+  --f-spinner-color: #26a760;
+}
+
+/* 移动端：工具栏按钮略小，避免遮挡 */
+@media (max-width: 640px) {
+  .fancybox__toolbar {
+    --f-button-width: 38px;
+    --f-button-height: 38px;
+    --f-button-svg-width: 18px;
+    --f-button-svg-height: 18px;
+    padding: 0.35rem 0.4rem;
+  }
+
+  .fancybox__carousel .fancybox__slide--navigation .f-button,
+  .fancybox__navigation .f-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .fancybox__slide {
+    padding: 0.5rem;
+  }
+
+  .fancybox__thumbs {
+    --f-thumb-width: 56px;
+    --f-thumb-height: 42px;
   }
 }
 

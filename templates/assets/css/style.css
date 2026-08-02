@@ -2985,15 +2985,111 @@ body.music-on .site-footer {
   color: var(--color-text-muted);
 }
 
-/* 覆盖 APlayer 767px 断点隐藏 .aplayer-time 的规则 */
+/* ========== 音乐播放器移动端适配（≤767px） ========== */
+
+/* 自定义移动端歌词显示 — 桌面端隐藏 */
+.mobile-lrc-display { display: none; }
+.mobile-lrc-text {
+  display: block;
+  width: 100%;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 16px;
+  text-align: center;           /* 短歌词居中显示 */
+  white-space: nowrap;
+  overflow: hidden;
+  /* 左右渐隐：短歌词时文字在中间完全不透明区不受影响，长歌词扩展到边缘自动渐隐 */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 1rem, #000 calc(100% - 1rem), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 1rem, #000 calc(100% - 1rem), transparent 100%);
+}
+
 @media (max-width: 767px) {
-  #nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-time {
-    display: flex;
-  }
-  #nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-time-inner,
-  #nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap {
-    display: none;
-  }
+
+/* 隐藏歌名和作者 */
+#nav-music .aplayer .aplayer-info .aplayer-music,
+#nav-music .aplayer .aplayer-info .aplayer-music .aplayer-title,
+#nav-music .aplayer .aplayer-info .aplayer-music .aplayer-author {
+  display: none !important;
+}
+
+/* 隐藏 APlayer 原生歌词（保留 DOM 供 JS 读取，仅视觉隐藏） */
+#nav-music .aplayer .aplayer-lrc,
+#nav-music .aplayer.aplayer-withlrc .aplayer-lrc {
+  opacity: 0 !important;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+/* 显示自定义歌词（替代 APlayer 原生歌词） */
+.mobile-lrc-display {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  margin-top: -8px;
+  left: 60px;                   /* 封面右侧结束于 ~52px + 8px 间距 */
+  right: 84px;                  /* 控制按钮占用 ~76px + 8px 间距 */
+  height: 16px;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+/* 显示 .aplayer-time 控制区域 */
+#nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-time {
+  display: flex !important;
+}
+
+/* 隐藏时间文字和音量，只保留图标 */
+#nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-time-inner,
+#nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap {
+  display: none !important;
+}
+
+/* 歌单按钮 */
+#nav-music .playlist-toggle {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+/* 歌单面板全宽适配 */
+.footer-music.has-playlist-open .playlist-panel {
+  max-height: min(50vh, 340px);
+}
+
+.playlist-panel__list {
+  max-height: min(42vh, calc(100vh - 13rem));
+}
+
+.playlist-panel__header {
+  font-size: 0.75em;
+  padding: 0.5rem 0.6rem;
+}
+
+.playlist-panel__song {
+  padding: 0.5rem 0.6rem;
+  min-height: 44px;
+}
+
+.playlist-panel__song-index {
+  font-size: 0.7em;
+}
+
+.playlist-panel__song-name {
+  font-size: 0.75em;
+}
+
+.playlist-panel__song-artist {
+  font-size: 0.65em;
+}
+
+/* body.nav-open 时防止菜单遮挡播放器 */
+body.nav-open .footer-music {
+  z-index: 7;
+}
 }
 
 /* ========== 文章归档页 ========== */
@@ -3709,55 +3805,6 @@ body.music-on .site-footer {
     width: 80px;
     height: 80px;
     margin-right: auto;
-  }
-
-  /* ---------  音乐播放器移动端适配  --------- */
-
-  /* APlayer 移动端默认隐藏 .aplayer-time，覆盖它 */
-  #nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-time {
-    display: flex;
-  }
-
-  /* 移动端隐藏时间文字和音量，只保留图标 */
-  #nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-time-inner,
-  #nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap {
-    display: none;
-  }
-
-  /* 歌单按钮增大触控区域 */
-  #nav-music .playlist-toggle {
-    width: 18px;
-    height: 18px;
-  }
-
-  /* 歌单面板全宽适配 */
-  .footer-music.has-playlist-open .playlist-panel {
-    max-height: 50vh;
-  }
-
-  .playlist-panel__list {
-    max-height: 42vh;
-  }
-
-  .playlist-panel__header {
-    font-size: 0.75em;
-    padding: 0.5rem 0.6rem;
-  }
-
-  .playlist-panel__song {
-    padding: 0.5rem 0.6rem;
-  }
-
-  .playlist-panel__song-index {
-    font-size: 0.7em;
-  }
-
-  .playlist-panel__song-name {
-    font-size: 0.75em;
-  }
-
-  .playlist-panel__song-artist {
-    font-size: 0.65em;
   }
 
   /* 链接页面移动端适配 */

@@ -163,6 +163,9 @@ function _everusCreatePlayer(songs) {
       }
     }
   }
+
+  // 移动端：启动自定义歌词显示同步
+  _everusInitMobileLrc(container);
 }
 
 function _everusBuildPanel(songs) {
@@ -208,6 +211,45 @@ function _everusEscape(str) {
   var div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+/* 移动端自定义歌词显示：监听 APlayer 原生歌词 DOM 变化，同步到独立显示元素 */
+function _everusInitMobileLrc(container) {
+  var display = document.querySelector('.mobile-lrc-text');
+  if (!display) return;
+
+  // 等待 APlayer 渲染出 .aplayer-lrc-contents（异步创建，需要延迟获取）
+  var tryInit = function (retries) {
+    retries = retries || 0;
+    var lrcContents = container.querySelector('.aplayer-lrc .aplayer-lrc-contents');
+    if (!lrcContents) {
+      if (retries < 20) {
+        setTimeout(function () { tryInit(retries + 1); }, 300);
+      }
+      return;
+    }
+
+    // 定时轮询当前歌词行（确保兼容性）
+    var lastText = '';
+    var syncLrc = function () {
+      var current = lrcContents.querySelector('.aplayer-lrc-current');
+      if (current) {
+        var text = current.textContent.trim();
+        if (text && text !== lastText) {
+          lastText = text;
+          display.textContent = text;
+        }
+      }
+    };
+
+    // 初始同步
+    syncLrc();
+
+    // 每 400ms 轮询一次
+    setInterval(syncLrc, 400);
+  };
+
+  tryInit();
 }
 
 function _everusInitMusic() {

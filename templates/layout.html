@@ -40,9 +40,9 @@
 
     <!-- Styles -->
     <link rel="stylesheet" th:href="@{/assets/css/icon.css?v={v}(v=${theme.spec.version})}" />
+    <link rel="stylesheet" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}" th:href="@{/assets/js/aplayer/APlayer.min.css?v={v}(v=${theme.spec.version})}" />
     <link rel="stylesheet" th:href="@{/assets/css/style.css?v={v}(v=${theme.spec.version})}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" />
-    <link rel="stylesheet" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}" th:href="@{/assets/js/aplayer/APlayer.min.css?v={v}(v=${theme.spec.version})}" />
 
     <!-- Custom font -->
     <th:block th:if="${theme.config.style.custom_font}">
@@ -222,6 +222,9 @@
     <div id="nav-music" class="footer-music" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
       <a id="nav-music-hoverTips"></a>
       <div id="aplayer-container"></div>
+      <div class="mobile-lrc-display" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
+        <span class="mobile-lrc-text"></span>
+      </div>
       <button class="playlist-toggle" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
         <span class="playlist-toggle__icon"></span>
       </button>

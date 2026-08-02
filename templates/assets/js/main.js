@@ -166,6 +166,12 @@ function _everusCreatePlayer(songs) {
 
   // 移动端：启动自定义歌词显示同步
   _everusInitMobileLrc(container);
+
+  // 将自定义歌词移入 #aplayer-container，使其以固定 41px 容器为定位参考
+  var lrcDisplay = document.querySelector('.mobile-lrc-display');
+  if (lrcDisplay && container && lrcDisplay.parentElement !== container) {
+    container.appendChild(lrcDisplay);
+  }
 }
 
 function _everusBuildPanel(songs) {

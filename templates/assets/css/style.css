@@ -2985,34 +2985,16 @@ body.music-on .site-footer {
   color: var(--color-text-muted);
 }
 
-/* ========== 音乐播放器移动端适配（≤767px） ========== */
+/* ========== 自定义歌词显示（PC + 移动端通用） ========== */
 
-/* 自定义移动端歌词显示 — 桌面端隐藏 */
-.mobile-lrc-display { display: none; }
-.mobile-lrc-text {
-  display: block;
-  width: 100%;
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  line-height: 16px;
-  text-align: center;           /* 短歌词居中显示 */
-  white-space: nowrap;
-  overflow: hidden;
-  /* 左右渐隐：短歌词时文字在中间完全不透明区不受影响，长歌词扩展到边缘自动渐隐 */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 1rem, #000 calc(100% - 1rem), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 1rem, #000 calc(100% - 1rem), transparent 100%);
-}
-
-@media (max-width: 767px) {
-
-/* 隐藏歌名和作者 */
+/* 隐藏歌名和作者，由歌词替代 */
 #nav-music .aplayer .aplayer-info .aplayer-music,
 #nav-music .aplayer .aplayer-info .aplayer-music .aplayer-title,
 #nav-music .aplayer .aplayer-info .aplayer-music .aplayer-author {
   display: none !important;
 }
 
-/* 隐藏 APlayer 原生歌词（保留 DOM 供 JS 读取，仅视觉隐藏） */
+/* 隐藏 APlayer 原生歌词（保留 DOM 供 JS 读取当前行文本） */
 #nav-music .aplayer .aplayer-lrc,
 #nav-music .aplayer.aplayer-withlrc .aplayer-lrc {
   opacity: 0 !important;
@@ -3021,20 +3003,43 @@ body.music-on .site-footer {
   z-index: -1;
 }
 
-/* 显示自定义歌词（替代 APlayer 原生歌词） */
+/* 自定义歌词容器：以 #aplayer-container（固定 41px）为定位参考，精确垂直居中 */
+#aplayer-container {
+  position: relative;
+  height: 41px;
+}
+
 .mobile-lrc-display {
   display: flex;
   align-items: center;
   position: absolute;
-  top: 50%;
-  margin-top: -8px;
-  left: 60px;                   /* 封面右侧结束于 ~52px + 8px 间距 */
-  right: 84px;                  /* 控制按钮占用 ~76px + 8px 间距 */
+  top: 50%;             /* 50% of 41px = 20.5px */
+  margin-top: -8px;     /* 16px / 2，精确居中于播放器 */
+  left: 48px;           /* body margin 16 + pic 25 + pic margin 3 + gap 4 */
+  right: 82px;          /* body margin 16 + time right 6 + controls ~60 */
   height: 16px;
   pointer-events: none;
   z-index: 2;
   overflow: hidden;
 }
+
+/* 歌词文字 */
+.mobile-lrc-text {
+  display: block;
+  width: 100%;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  /* 左右渐隐：短歌词居中在完全不透明区不受影响，长歌词扩展到边缘自动渐隐 */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 1rem, #000 calc(100% - 1rem), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 1rem, #000 calc(100% - 1rem), transparent 100%);
+}
+
+/* ========== 音乐播放器移动端适配（≤767px） ========== */
+@media (max-width: 767px) {
 
 /* 显示 .aplayer-time 控制区域 */
 #nav-music .aplayer .aplayer-info .aplayer-controller .aplayer-time {

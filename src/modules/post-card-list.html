@@ -1,0 +1,45 @@
+<!-- 通用文章卡片网格 -->
+<th:block th:fragment="post-card-list(posts, emptyTitle, emptyDesc)">
+  <div class="post-masonry" th:if="${posts?.items != null and not posts.items.isEmpty()}">
+    <article class="post-card" th:each="post,iterStat : ${posts.items}">
+      <a th:href="@{${post?.status?.permalink}}" class="post-card__link">
+
+        <!-- 封面 -->
+        <figure class="post-card__cover">
+          <img th:if="${not #strings.isEmpty(post?.spec?.cover)}"
+               th:src="${post.spec.cover}"
+               th:alt="${post?.spec?.title}" loading="lazy" />
+          <img th:unless="${not #strings.isEmpty(post?.spec?.cover)}"
+               th:src="@{/assets/images/bg.jpg}"
+               th:alt="${post?.spec?.title}" loading="lazy" />
+          <span class="post-card__index" th:text="${'0' + (iterStat.index + 1)}"></span>
+        </figure>
+
+        <!-- 信息 -->
+        <div class="post-card__body">
+          <h2 class="post-card__title line-clamp" th:text="${post?.spec?.title}"></h2>
+
+          <div class="post-card__meta">
+            <time th:if="${post?.spec?.publishTime}"
+                  th:text="${#temporals.format(post.spec.publishTime, 'yyyy-MM-dd')}"></time>
+            <span th:if="${(post?.status?.commentsCount ?: 0) > 0}"
+                  th:text="${post?.status?.commentsCount} + ' 评论'"></span>
+          </div>
+
+          <p class="post-card__excerpt line-clamp"
+             th:if="${not #strings.isEmpty(post?.status?.excerpt)}"
+             th:text="${post?.status?.excerpt}"></p>
+        </div>
+      </a>
+    </article>
+  </div>
+
+  <!-- 空状态 -->
+  <div th:unless="${posts?.items != null and not posts.items.isEmpty()}" class="archive-empty">
+    <div class="archive-empty__icon">
+      <i class="Nug Nug-wenzhang"></i>
+    </div>
+    <h2 th:text="${emptyTitle}"></h2>
+    <p th:text="${emptyDesc}"></p>
+  </div>
+</th:block>

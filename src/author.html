@@ -1,0 +1,113 @@
+﻿<include src="layout.html">
+    <div class="archive-page archive-page--author">
+
+      <!-- ====== Hero 头部 ====== -->
+      <header class="archive-hero" th:if="${author?.spec?.displayName}">
+        <div class="archive-hero__inner">
+          <nav class="archive-hero__breadcrumb">
+            <a th:href="@{/}">首页</a>
+            <span class="archive-hero__breadcrumb-sep">/</span>
+            <span class="archive-hero__breadcrumb-cur" th:text="${author?.spec?.displayName}"></span>
+          </nav>
+
+          <h1 class="archive-hero__title">
+            <span class="archive-hero__kicker">Author</span>
+            <span th:text="${author?.spec?.displayName}"></span>
+          </h1>
+
+          <div class="archive-hero__meta">
+            <span class="hero-badge hero-badge--accent">
+              <i class="Nug Nug-wenzhang"></i>
+              <span th:text="${posts?.total ?: 0}"></span>
+              <span>篇文章</span>
+            </span>
+            <span class="hero-badge hero-badge--muted" th:if="${(posts?.totalPages ?: 0) > 1}">
+              <i class="Nug Nug-riqi"></i>
+              <span th:text="|第 ${posts?.page ?: 1} / ${posts?.totalPages ?: 1} 页|"></span>
+            </span>
+          </div>
+
+          <div class="archive-hero__desc" th:if="${not #strings.isEmpty(author?.spec?.bio)}">
+            <p th:text="${author?.spec?.bio}"></p>
+          </div>
+        </div>
+      </header>
+
+      <!-- ====== 回退 Header ====== -->
+      <header class="archive-hero archive-hero--minimal" th:unless="${author?.spec?.displayName}">
+        <div class="archive-hero__inner">
+          <h1 class="archive-hero__title">
+            <span class="archive-hero__kicker">Author</span>
+            <span>作者</span>
+          </h1>
+        </div>
+      </header>
+
+      <!-- ====== 主体：文章网格 + 侧边栏 ====== -->
+      <div class="archive-body archive-body--sidebar">
+
+        <!-- 文章卡片网格 -->
+        <div class="archive-body__main">
+          <th:block th:replace="~{modules/post-card-list :: post-card-list(posts=${posts}, emptyTitle='暂无文章', emptyDesc='该作者尚未发布文章。')}"></th:block>
+        </div>
+
+        <!-- ====== 侧边栏 ====== -->
+        <aside class="archive-sidebar" th:if="${author?.spec?.displayName}">
+          <!-- 作者信息卡 -->
+          <div class="archive-sidebar__card archive-sidebar__card--author">
+            <div class="archive-sidebar__avatar-wrap">
+              <img class="archive-sidebar__avatar"
+                   th:src="${#strings.isEmpty(author?.spec?.avatar) ? #theme.assets('/images/avatar.jpg') : author.spec.avatar}"
+                   th:alt="${author?.spec?.displayName}" />
+              <span class="archive-sidebar__avatar-ring"></span>
+            </div>
+            <h3 class="archive-sidebar__name" th:text="${author?.spec?.displayName}"></h3>
+            <p class="archive-sidebar__bio" th:if="${not #strings.isEmpty(author?.spec?.bio)}"
+               th:text="${author?.spec?.bio}"></p>
+
+            <!-- 联系方式 -->
+            <div class="archive-sidebar__contact" th:if="${(not #strings.isEmpty(author?.spec?.email) and theme.config.author.show_email) or (not #strings.isEmpty(author?.spec?.phone) and theme.config.author.show_phone)}">
+              <div class="archive-sidebar__contact-item" th:if="${not #strings.isEmpty(author?.spec?.email) and theme.config.author.show_email}">
+                <i class="Nug Nug-youjian"></i>
+                <span th:text="${author?.spec?.email}"></span>
+              </div>
+              <div class="archive-sidebar__contact-item" th:if="${not #strings.isEmpty(author?.spec?.phone) and theme.config.author.show_phone}">
+                <i class="Nug Nug-shouji"></i>
+                <span th:text="${author?.spec?.phone}"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 统计卡 -->
+          <div class="archive-sidebar__card">
+            <div class="archive-sidebar__stat">
+              <span class="archive-sidebar__stat-num" th:text="${posts?.total ?: 0}"></span>
+              <span class="archive-sidebar__stat-label">篇文章</span>
+            </div>
+            <div class="archive-sidebar__stat" th:if="${(posts?.totalPages ?: 0) > 1}">
+              <span class="archive-sidebar__stat-num" th:text="${posts?.totalPages ?: 1}"></span>
+              <span class="archive-sidebar__stat-label">页</span>
+            </div>
+          </div>
+
+          <!-- 快捷链接 -->
+          <nav class="archive-sidebar__card">
+            <h3 class="archive-sidebar__heading">快捷链接</h3>
+            <a th:href="@{/categories}" class="archive-sidebar__link">
+              <i class="Nug Nug-wenzhang2"></i> 所有分类
+            </a>
+            <a th:href="@{/archives}" class="archive-sidebar__link">
+              <i class="Nug Nug-riqi"></i> 归档
+            </a>
+            <a th:href="@{/tags}" class="archive-sidebar__link">
+              <i class="Nug Nug-biaoqian"></i> 标签
+            </a>
+          </nav>
+        </aside>
+      </div>
+
+      <!-- ====== 分页 ====== -->
+      <th:block th:replace="~{modules/pagination :: pagination(posts=${posts})}"></th:block>
+
+    </div>
+</include>

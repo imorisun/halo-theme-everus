@@ -1,0 +1,20 @@
+<!-- 通用分页组件 -->
+<th:block th:fragment="pagination(posts)">
+  <nav class="sticky-pagination" th:if="${posts?.hasPrevious() or posts?.hasNext()}">
+    <a th:if="${posts?.hasPrevious()}" th:href="@{${posts?.prevUrl}}" class="sticky-pagination__btn sticky-pagination__btn--prev">
+      <i class="Nug Nug-youbian"></i>
+      <span>上一页</span>
+    </a>
+    <div class="sticky-pagination__dots" th:if="${(posts?.totalPages ?: 0) > 1}">
+      <span th:each="i : ${#numbers.sequence(1, posts?.totalPages ?: 1)}"
+            th:classappend="${i == (posts?.page ?: 1) ? 'sticky-pagination__dot--active' : ''}"
+            class="sticky-pagination__dot"></span>
+    </div>
+    <span class="sticky-pagination__text" th:unless="${(posts?.totalPages ?: 0) > 1}"
+          th:text="|${posts?.page ?: 1} / ${posts?.totalPages ?: 1}|"></span>
+    <a th:if="${posts?.hasNext()}" th:href="@{${posts?.nextUrl}}" class="sticky-pagination__btn sticky-pagination__btn--next">
+      <span>下一页</span>
+      <i class="Nug Nug-youbian"></i>
+    </a>
+  </nav>
+</th:block>

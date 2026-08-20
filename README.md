@@ -39,8 +39,8 @@ EverUs 是一款为 [Halo 2.0](https://halo.run) 打造的**暗色系杂志风�
 | 依赖 | 版本要求 |
 |------|---------|
 | Halo | ≥ 2.19.0 |
-| Node.js（仅打包时） | ≥ 18 |
-| pnpm（仅打包时） | ≥ 8 |
+| Node.js（仅构建时） | ≥ 20.19 |
+| pnpm（仅构建时） | ≥ 10 |
 
 ## 🚀 安装
 
@@ -63,6 +63,11 @@ EverUs 是一款为 [Halo 2.0](https://halo.run) 打造的**暗色系杂志风�
 ```bash
 # 克隆仓库到 Halo 主题目录
 git clone https://github.com/imorisun/halo-theme-everus.git ~/.halo2/themes/halo-theme-everus
+
+# 安装依赖并构建模板（templates/ 目录由 Vite 构建生成，不随仓库分发）
+cd ~/.halo2/themes/halo-theme-everus
+pnpm install
+pnpm build-only
 
 # 重启 Halo 后，在 Console → 外观 → 主题管理中启用
 ```
@@ -124,10 +129,9 @@ halo-theme-everus/
 ├── .github/
 │   └── workflows/
 │       └── cd.yaml              # GitHub Actions CD 流水线
-├── gradle/
-│   └── wrapper/                 # Gradle Wrapper
-├── templates/                   # Thymeleaf 模板文件
-│   ├── layout.html              # 全局布局（导航、页脚、播放器）
+├── src/                         # 模板源文件（Vite 构建入口）
+│   ├── partials/
+│   │   └── layout.html          # 全局布局（include/slot，构建期内联）
 │   ├── index.html               # 首页
 │   ├── post.html                # 文章详情页
 │   ├── page.html                # 自定义页面
@@ -141,11 +145,12 @@ halo-theme-everus/
 │   ├── links.html               # 友链页
 │   ├── error/
 │   │   └── error.html           # 错误页面
-│   ├── modules/
-│   │   ├── pagination.html      # 分页组件
-│   │   ├── post-card-list.html  # 文章卡片列表
-│   │   └── widgets/
-│   │       └── comment.html     # 评论组件
+│   └── modules/                 # Thymeleaf 运行时片段（th:replace）
+│       ├── pagination.html      # 分页组件
+│       ├── post-card-list.html  # 文章卡片列表
+│       └── widgets/
+│           └── comment.html     # 评论组件
+├── public/                      # 静态资源（原样拷贝到 templates/assets/）
 │   └── assets/
 │       ├── css/
 │       │   ├── style.css        # 主题全局样式
@@ -154,11 +159,12 @@ halo-theme-everus/
 │       │   ├── main.js          # 核心交互逻辑
 │       │   └── aplayer/         # 音乐播放器相关文件
 │       └── images/              # 图片资源
+├── templates/                   # Vite 构建产物（已 gitignore，勿手改）
 ├── theme.yaml                   # 主题元数据配置
 ├── settings.yaml                # 主题设置表单定义
 ├── screenshot.png               # 主题预览截图
-├── build.gradle                 # Gradle 构建配置
-├── package.json                 # pnpm 配置 & 打包脚本
+├── vite.config.ts               # Vite 构建配置
+├── package.json                 # pnpm 配置 & 构建/打包脚本
 └── LICENSE                      # GPL-3.0 许可证
 ```
 
@@ -166,23 +172,22 @@ halo-theme-everus/
 
 ### 技术栈
 
-- **模板引擎**：Thymeleaf 3.0.12
-- **前端核心**：jQuery 3.7.1
+- **模板引擎**：Thymeleaf（由 Halo 提供）+ `include`/`slot` 构建期组件（vite-plugin-halo-theme）
 - **动画引擎**：GSAP 3.12.5（ScrollTrigger）
 - **图片灯箱**：Fancyapps UI 5.0.36
 - **音乐播放**：APlayer + Meting2
-- **构建工具**：Gradle + pnpm + @halo-dev/theme-package-cli
+- **构建工具**：Vite + @halo-dev/vite-plugin-halo-theme + @halo-dev/theme-package-cli
 
 ### 本地开发环境搭建
 
-1. **安装依赖**
+1. **安装依赖并启动监视构建**
 
 ```bash
-# 安装前端依赖
+# 安装依赖
 pnpm install
 
-# 构建 Gradle 项目（可选）
-./gradlew clean build
+# 监视模式：src/ 或 public/ 变更时自动重新构建 templates/
+pnpm dev
 ```
 
 2. **链接到 Halo 主题目录**
@@ -248,11 +253,16 @@ spring:
 ### 打包发布
 
 ```bash
-# 构建主题 ZIP 包
+# 构建模板并打包主题 ZIP（vite build + theme-package）
 pnpm build
 
-# 产物输出至 dist/ 目录
+# 仅构建模板（templates/），不打包
+pnpm build-only
+
+# 产物输出至 dist/halo-theme-everus-<version>.zip
 ```
+
+> 📌 `templates/` 目录由 `src/` + `public/` 构建生成，已加入 `.gitignore`，请勿手动修改或提交。
 
 CI/CD 使用 GitHub Actions，在 Release 发布时自动构建并发布到 Halo 应用市场。
 

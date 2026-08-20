@@ -7,9 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
-.DS_Store
-*.local
+.pnpm-store
+
+# Vite build output (templates/ is generated from src/ + public/)
+templates
+dist
 
 # Editor directories and files
 .vscode/*
@@ -21,6 +25,6 @@ node_modules
 *.sln
 *.sw?
 
-.gradle
-build
-dist
+# OS
+.DS_Store
+*.local

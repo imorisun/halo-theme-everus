@@ -5,7 +5,10 @@ var UPVOTE_STORAGE_KEY = 'halo.upvoted.moment.names';
 
 function getUpvotedNames() {
   try {
-    return JSON.parse(localStorage.getItem(UPVOTE_STORAGE_KEY) || '[]');
+    var parsed = JSON.parse(localStorage.getItem(UPVOTE_STORAGE_KEY) || '[]');
+    // 只 try/catch 解析不够：若该键被写成 {} 或字符串，解析能成功但不是数组，
+    // 后续的 names.push / names.forEach 会抛错，整个点赞功能连带失效。
+    return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
     return [];
   }
@@ -15,23 +18,40 @@ function isMomentUpvoted(name) {
   return getUpvotedNames().indexOf(name) !== -1;
 }
 
+// 正在请求中的瞬间，用于防连点。
+// 仅靠 isMomentUpvoted 是不够的：它读 localStorage，而 localStorage 只在
+// xhr.onload 里才写入，因此快速双击会有两次点击都通过判断、发出两个 POST，
+// 服务端计数 +2 而本地只记一次。
+var _everusUpvoteInFlight = {};
+
 function handleMomentUpvote(btn, name) {
   if (isMomentUpvoted(name)) return;
+  if (_everusUpvoteInFlight[name]) return;
+  _everusUpvoteInFlight[name] = true;
+
+  var done = function () { delete _everusUpvoteInFlight[name]; };
 
   var xhr = new XMLHttpRequest();
   xhr.open('POST', '/apis/api.halo.run/v1alpha1/trackers/upvote');
   xhr.setRequestHeader('Content-Type', 'application/json');
 
   xhr.onload = function () {
+    done();
     if (xhr.status < 200 || xhr.status >= 300) return;
+
     var names = getUpvotedNames();
     names.push(name);
-    localStorage.setItem(UPVOTE_STORAGE_KEY, JSON.stringify(names));
+    // 包 try/catch：无痕模式或配额耗尽时 setItem 会抛错，
+    // 若不捕获，下面的计数与高亮更新就全都不会执行。
+    try {
+      localStorage.setItem(UPVOTE_STORAGE_KEY, JSON.stringify(names));
+    } catch (e) {}
 
     // Update all count displays for this moment
     var spans = document.querySelectorAll('[data-upvote-moment-name="' + name + '"]');
     spans.forEach(function (span) {
-      var count = parseInt(span.textContent || '0');
+      var count = parseInt(span.textContent || '0', 10);
+      if (isNaN(count)) count = 0;
       span.textContent = (count + 1) + '';
     });
 
@@ -40,7 +60,8 @@ function handleMomentUpvote(btn, name) {
   };
 
   xhr.onerror = function () {
-    console.error('点赞失败，请稍后再试');
+    done();
+    console.error('[EverUs] 点赞失败，请稍后再试');
   };
 
   xhr.send(JSON.stringify({
@@ -55,8 +76,15 @@ function markMomentLiked(name) {
   document.querySelectorAll('[data-upvote-moment-name="' + name + '"]').forEach(function (span) {
     var btn = span.closest('.home-moment__action--like, .moment-card__action--like');
     if (btn) {
-      btn.style.color = '#e53e3e';
+      // 不再写内联 btn.style.color：.is-liked 在 style.css 里已经设了 color: #e53e3e，
+      // 内联样式是冗余的，而且优先级高于 CSS，会让这个颜色无法被主题覆盖。
       btn.classList.add('is-liked');
+      btn.setAttribute('aria-pressed', 'true');
+      // 用 aria-disabled 而不是 disabled 属性：
+      // disabled 会让按钮无法聚焦，按钮内的点赞数对键盘/读屏用户就读不到了。
+      // aria-disabled 保留可聚焦性，同时告知辅助技术「此操作已不可用」，
+      // 实际的拦截由 handleMomentUpvote 开头的判断完成。
+      btn.setAttribute('aria-disabled', 'true');
     }
   });
 }
@@ -72,7 +100,11 @@ function initMomentUpvotes() {
 function toggleMomentComments(name) {
   var el = document.getElementById('moment-comments-' + name);
   if (!el) return;
-  el.classList.toggle('is-expanded');
+  var expanded = el.classList.toggle('is-expanded');
+  // 同步触发按钮的 aria-expanded（按钮用 aria-controls 指向该容器）
+  document.querySelectorAll('[aria-controls="moment-comments-' + name + '"]').forEach(function (btn) {
+    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  });
 }
 
 /* ==========  音乐播放器初始化  ========== */
@@ -351,9 +383,11 @@ function initLayoutOnce() {
   var daohang = document.querySelector('.daohang');
   if (daohang) {
     daohang.addEventListener('click', function (e) {
-      document.body.classList.toggle('nav-open');
+      var open = document.body.classList.toggle('nav-open');
+      daohang.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     document.body.classList.remove('nav-open');
+    daohang.setAttribute('aria-expanded', 'false');
   }
 
   // 点击导航链接关闭移动端菜单
@@ -365,15 +399,43 @@ function initLayoutOnce() {
       return;
     }
     document.body.classList.remove('nav-open');
+    if (daohang) daohang.setAttribute('aria-expanded', 'false');
   });
 
   /* ---------  Music toggle  --------- */
   var musicToggle = document.querySelector('.music__toggle');
   if (musicToggle) {
     musicToggle.addEventListener('click', function () {
-      document.body.classList.toggle('music-on');
+      var on = document.body.classList.toggle('music-on');
+      musicToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   }
+
+  /* ---------  二级菜单展开态同步（aria-expanded + .is-expanded）  --------- */
+  // 二级菜单原本只靠 CSS :hover 展开，而模板里的 aria-expanded 是写死的 "false"，
+  // 永远不会变 —— 对屏幕阅读器是错误信息。
+  // style.css 里本就有 .is-expanded 这个钩子但从未被 JS 设置过，这里一并用上：
+  // 鼠标移入/移出与焦点进入/离开都同步类名与 aria 状态，使该属性真实反映状态。
+  // （键盘可达性另由 CSS 的 :focus-within 兜底，即使本段 JS 失效也能打开子菜单。）
+  document.querySelectorAll('.site-nav__dropdown-item.has-children').forEach(function (item) {
+    if (item.dataset.everusAria) return;
+    item.dataset.everusAria = '1';
+    var link = item.querySelector('.site-nav__dropdown-link');
+    if (!link) return;
+
+    var sync = function (expanded) {
+      link.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      item.classList.toggle('is-expanded', expanded);
+    };
+
+    item.addEventListener('mouseenter', function () { sync(true); });
+    item.addEventListener('mouseleave', function () { sync(false); });
+    item.addEventListener('focusin', function () { sync(true); });
+    item.addEventListener('focusout', function (e) {
+      // 焦点仍在子菜单内部时不收起
+      if (!item.contains(e.relatedTarget)) sync(false);
+    });
+  });
 
   /* ---------  二级菜单键盘导航（布局元素，仅绑定一次）  --------- */
   (function () {
@@ -416,16 +478,23 @@ function initLayoutOnce() {
   var navMusic = document.getElementById('nav-music');
   var playlistClose = document.querySelector('.playlist-panel__close');
 
+  // 统一入口：类名与 aria-expanded 必须一起变，避免三处调用各自漏掉一个
+  function setPlaylistOpen(open) {
+    if (!navMusic) return;
+    navMusic.classList.toggle('has-playlist-open', open);
+    if (playlistToggle) playlistToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
   if (playlistToggle && navMusic) {
     playlistToggle.addEventListener('click', function (e) {
       e.stopPropagation();
-      navMusic.classList.toggle('has-playlist-open');
+      setPlaylistOpen(!navMusic.classList.contains('has-playlist-open'));
     });
   }
 
   if (playlistClose && navMusic) {
     playlistClose.addEventListener('click', function () {
-      navMusic.classList.remove('has-playlist-open');
+      setPlaylistOpen(false);
     });
   }
 
@@ -433,7 +502,7 @@ function initLayoutOnce() {
   document.addEventListener('click', function (e) {
     if (navMusic && navMusic.classList.contains('has-playlist-open')) {
       if (!navMusic.contains(e.target)) {
-        navMusic.classList.remove('has-playlist-open');
+        setPlaylistOpen(false);
       }
     }
   });
@@ -453,11 +522,13 @@ function initLayoutOnce() {
       clearTimeout(closeTimer);
       panel.classList.add('is-open');
       toggleBtn.classList.add('is-active');
+      toggleBtn.setAttribute('aria-expanded', 'true');
     }
 
     function closePanel() {
       panel.classList.remove('is-open');
       toggleBtn.classList.remove('is-active');
+      toggleBtn.setAttribute('aria-expanded', 'false');
     }
 
     function scheduleClose() {
@@ -487,12 +558,20 @@ function initLayoutOnce() {
       panel.addEventListener('mouseenter', openPanel);
       toggleBtn.addEventListener('mouseleave', scheduleClose);
       panel.addEventListener('mouseleave', scheduleClose);
+      // 键盘可达：桌面端原本只响应 hover，键盘用户根本打不开这个面板
+      toggleBtn.addEventListener('focus', openPanel);
+      toggleBtn.addEventListener('blur', scheduleClose);
+      panel.addEventListener('focusin', openPanel);
+      panel.addEventListener('focusout', function (e) {
+        if (!panel.contains(e.relatedTarget) && e.relatedTarget !== toggleBtn) scheduleClose();
+      });
     }
 
-    // ESC 关闭
+    // ESC 关闭，并把焦点交还触发按钮 —— 否则焦点会滞留在已隐藏的面板内部
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && panel.classList.contains('is-open')) {
         closePanel();
+        toggleBtn.focus();
       }
     });
   })();
@@ -624,8 +703,15 @@ function animateParagraphs() {
 }
 
 function setActiveLink() {
-  var currentUrl = window.location.href;
+  // 去掉结尾斜杠（根路径除外），使 /archives 与 /archives/ 视为同一路径
+  var normalize = function (p) {
+    if (!p) return '/';
+    return p.length > 1 ? p.replace(/\/+$/, '') : p;
+  };
+
+  var currentPath = normalize(window.location.pathname);
   var links = document.querySelectorAll('.site-nav__dropdown-link, .site-nav__submenu-link');
+
   links.forEach(function (link) {
     link.classList.remove('mm-active');
     if (link.parentElement) link.parentElement.classList.remove('mm-active');
@@ -634,14 +720,44 @@ function setActiveLink() {
     var isEmpty = !rawHref || rawHref === '#' || rawHref === 'javascript:void(0)';
     link.classList.toggle('is-empty-href', isEmpty);
   });
+
+  // 原实现是 link.href === window.location.href 全等比较，只要 URL 带上查询串或
+  // 结尾斜杠就匹配不上 —— 例如翻到第 2 页（/archives?page=2 或 /archives/page/2）
+  // 导航高亮就会整个丢失。
+  // 改为按 pathname 比较：先找精确匹配；没有精确匹配时，退而选择「路径前缀最长」
+  // 的那个链接（例如在 /tags/foo 上高亮「标签」）。取最长可避免多个条目同时高亮。
+  var best = null;
+  var bestLen = -1;
+
   links.forEach(function (link) {
     // 跳过空链接：href 为空时浏览器会解析为当前页 URL，导致误激活
     if (link.classList.contains('is-empty-href')) return;
-    if (link.href === currentUrl) {
-      link.classList.add('mm-active');
-      if (link.parentElement) link.parentElement.classList.add('mm-active');
+
+    var linkPath;
+    try {
+      linkPath = normalize(new URL(link.href, window.location.origin).pathname);
+    } catch (e) {
+      return;
+    }
+
+    var score = -1;
+    if (linkPath === currentPath) {
+      score = Infinity; // 精确匹配优先
+    } else if (linkPath !== '/' && currentPath.indexOf(linkPath + '/') === 0) {
+      // 前缀匹配；排除 '/' 否则首页会命中所有页面
+      score = linkPath.length;
+    }
+
+    if (score > bestLen) {
+      bestLen = score;
+      best = link;
     }
   });
+
+  if (best) {
+    best.classList.add('mm-active');
+    if (best.parentElement) best.parentElement.classList.add('mm-active');
+  }
 }
 
 /* ==========  PJAX 页面过渡  ========== */
@@ -698,11 +814,27 @@ function setActiveLink() {
     if (isNavigating) return;
     isNavigating = true;
 
+    // 离开当前页前，把滚动位置存进「当前」这条 history 记录。
+    // 只在前进导航时做：popstate 触发时 history.state 已经切到目标记录，
+    // 此时再写就会用当前滚动位置覆盖掉目标记录里保存的值。
+    if (!isPopState) {
+      try {
+        history.replaceState({ everusScrollY: window.scrollY }, '', location.href);
+      } catch (e) {}
+    }
+
     // 关闭弹层与面板
     if (typeof Fancybox !== 'undefined') { try { Fancybox.close(true); } catch (e) {} }
     var statPanel = document.getElementById('site-status-panel');
     if (statPanel) statPanel.classList.remove('is-open');
+    var statToggle = document.querySelector('.site-status__toggle');
+    if (statToggle) {
+      statToggle.classList.remove('is-active');
+      statToggle.setAttribute('aria-expanded', 'false');
+    }
     document.body.classList.remove('nav-open');
+    var navToggle = document.querySelector('.daohang');
+    if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
 
     var container = document.getElementById(CONTAINER_ID);
 
@@ -798,16 +930,34 @@ function setActiveLink() {
         document.body.appendChild(s);
       });
 
-      // ⑦ 更新 URL & 滚动
-      if (!isPopState) history.pushState(null, '', url);
-      window.scrollTo(0, 0);
+      // ⑦ 更新 URL & 滚动位置
+      // 前进导航：新记录初始滚动位置为 0；后退/前进：取回该记录保存的位置。
+      // 原实现无条件 scrollTo(0, 0)，导致浏览器「后退」后总是跳到页顶，
+      // 丢失用户原来的阅读位置。
+      var targetScrollY = 0;
+      if (isPopState) {
+        targetScrollY = (history.state && history.state.everusScrollY) || 0;
+      } else {
+        try { history.pushState({ everusScrollY: 0 }, '', url); } catch (e) {}
+      }
 
       // ⑧ 重新初始化页面组件
       initPageContent();
 
-      // ⑨ 淡入（双 rAF 确保新内容已以 opacity:0 渲染过一帧）
+      // ⑨ 焦点管理：内容被整体替换后，原焦点元素已从 DOM 移除，
+      // 键盘/读屏用户会失去位置。把焦点移到新内容容器上。
+      // tabindex=-1 使容器可编程聚焦但不进入 Tab 序列；preventScroll 避免
+      // 聚焦行为覆盖下面刚设置好的滚动位置。
+      if (container) {
+        container.setAttribute('tabindex', '-1');
+        try { container.focus({ preventScroll: true }); } catch (e) { container.focus(); }
+      }
+
+      // ⑩ 淡入（双 rAF 确保新内容已以 opacity:0 渲染过一帧）
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
+          // 在新内容完成布局后再滚动，否则目标位置可能超出当时的文档高度而被截断
+          window.scrollTo(0, targetScrollY);
           container.classList.remove('is-leaving');
           container.classList.remove('is-loading');
           isNavigating = false;

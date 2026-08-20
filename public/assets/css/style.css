@@ -109,10 +109,31 @@ body {
   }
 }
 
+/* 可访问性：视觉上隐藏、但保留在无障碍树中供屏幕阅读器朗读。
+   用于给纯图标按钮补充动作名称，使其可访问名成为「动作 + 计数」
+   （例如「点赞 5」）而不是孤零零的一个数字。 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ========== 页面过渡动画（PJAX） ========== */
 /* PJAX 切换：#pjax-container.is-leaving 由 JS 控制，淡出→替换→淡入 */
 #pjax-container {
   transition: opacity 0.25s ease;
+}
+/* PJAX 换页后 main.js 会把焦点移到本容器（tabindex=-1）以便键盘/读屏用户
+   接着往下 Tab；这是编程式聚焦，不需要显示焦点框。 */
+#pjax-container:focus {
+  outline: none;
 }
 #pjax-container.is-leaving {
   opacity: 0;
@@ -332,7 +353,11 @@ a {
 }
 
 /* 展开态 */
+/* :focus-within 让二级菜单可用键盘到达 —— 原先只有 :hover，
+   键盘用户无法打开子菜单（JS 里只有「已展开后」的方向键导航，没有展开逻辑）。
+   这条纯 CSS 兜底即使 JS 失效也生效。 */
 .site-nav__dropdown-item.has-children:hover .site-nav__submenu,
+.site-nav__dropdown-item.has-children:focus-within .site-nav__submenu,
 .site-nav__dropdown-item.has-children.is-expanded .site-nav__submenu {
   opacity: 1;
   visibility: visible;
@@ -341,6 +366,7 @@ a {
 }
 
 .site-nav__dropdown-item.has-children:hover > .site-nav__dropdown-link::after,
+.site-nav__dropdown-item.has-children:focus-within > .site-nav__dropdown-link::after,
 .site-nav__dropdown-item.has-children.is-expanded > .site-nav__dropdown-link::after {
   transform: rotate(180deg);
   opacity: 0.8;
@@ -1935,15 +1961,21 @@ a {
   background-color: var(--color-primary-alpha-sm);
 }
 
+/* 已点赞态。
+   服务端 tracker 是匿名递增计数器（请求体不含任何用户身份），无法真正撤销点赞，
+   所以这里明确表达「已完成、不可再操作」：去掉指针手型，并取消 hover 变化
+   —— 原先 hover 会变色加底色，暗示「还能再点」，而实际点击毫无反应。
+   配合 main.js 设置的 aria-pressed="true" + aria-disabled="true"。 */
 .home-moment__action.is-liked,
 .moment-card__action.is-liked {
   color: #e53e3e;
+  cursor: default;
 }
 
 .home-moment__action.is-liked:hover,
 .moment-card__action.is-liked:hover {
-  color: #c53030;
-  background-color: rgba(229, 62, 62, 0.08);
+  color: #e53e3e;
+  background-color: transparent;
 }
 
 .home-moment__action i {

@@ -69,7 +69,7 @@
       <div class="site-nav">
         <div class="site-nav__inner">
           <nav class="site-nav__menu" role="navigation">
-            <ul class="site-nav__dropdown site-nav__dropdown--cat">
+            <ul class="site-nav__dropdown site-nav__dropdown--cat" id="site-nav-menu">
               <li class="site-nav__dropdown-item">
                 <a class="site-nav__dropdown-link" th:href="@{/}" th:text="#{common.home}">首页</a>
               </li>
@@ -80,7 +80,7 @@
                      class="site-nav__dropdown-link"
                      th:text="${item?.status?.displayName}"
                      th:aria-haspopup="${item.children != null and not item.children.isEmpty() ? 'true' : 'false'}"
-                     aria-expanded="false"></a>
+                     th:aria-expanded="${item.children != null and not item.children.isEmpty() ? 'false' : null}"></a>
                   <ul class="site-nav__submenu" th:if="${item.children != null and not item.children.isEmpty()}" role="menu">
                     <li class="site-nav__submenu-item" th:each="child : ${item.children}" role="none">
                       <a th:href="${#strings.isEmpty(child?.status?.href) ? null : child?.status?.href}"
@@ -92,19 +92,19 @@
                 </li>
               </th:block>
             </ul>
-            <button class="daohang">
-              <i class="Nug Nug-daohang"></i>
+            <button class="daohang" type="button" th:aria-label="#{a11y.menuToggle}" aria-expanded="false" aria-controls="site-nav-menu">
+              <i class="Nug Nug-daohang" aria-hidden="true"></i>
             </button>
           </nav>
 
           <div class="site-nav__actions">
-            <button class="music__toggle" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
-              <i class="Nug Nug-yinle"></i>
+            <button class="music__toggle" type="button" th:aria-label="#{a11y.musicToggle}" aria-pressed="false" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
+              <i class="Nug Nug-yinle" aria-hidden="true"></i>
             </button>
-            <button class="huojian__toggle hidden">
-              <i class="Nug Nug-huojian"></i>
+            <button class="huojian__toggle hidden" type="button" th:aria-label="#{a11y.backToTop}">
+              <i class="Nug Nug-huojian" aria-hidden="true"></i>
             </button>
-            <button class="site-status__toggle" th:aria-label="#{nav.siteStatus}" th:title="#{nav.siteStatus}">
+            <button class="site-status__toggle" type="button" th:aria-label="#{nav.siteStatus}" th:title="#{nav.siteStatus}" aria-expanded="false" aria-controls="site-status-panel">
               <th:block th:if="${#strings.isEmpty(#authentication.name) or #authentication.name == 'anonymousUser'}">
                 <th:block th:if="${not #strings.isEmpty(site.logo)}">
                   <img class="site-status__avatar" th:src="${site.logo}" alt="Avatar" />
@@ -224,13 +224,13 @@
       <div class="mobile-lrc-display" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
         <span class="mobile-lrc-text"></span>
       </div>
-      <button class="playlist-toggle" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
-        <span class="playlist-toggle__icon"></span>
+      <button class="playlist-toggle" type="button" th:aria-label="#{a11y.playlistToggle}" aria-expanded="false" aria-controls="playlist-panel" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}">
+        <span class="playlist-toggle__icon" aria-hidden="true"></span>
       </button>
-      <div class="playlist-panel">
+      <div class="playlist-panel" id="playlist-panel">
         <div class="playlist-panel__header">
           <span th:text="#{nav.playlist}">歌单列表</span>
-          <button class="playlist-panel__close"><i class="Nug Nug-guanbi"></i></button>
+          <button class="playlist-panel__close" type="button" th:aria-label="#{a11y.closePlaylist}"><i class="Nug Nug-guanbi" aria-hidden="true"></i></button>
         </div>
         <ul class="playlist-panel__list"></ul>
       </div>

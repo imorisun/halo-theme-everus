@@ -1,4 +1,8 @@
-﻿<include src="layout.html">
+<include src="layout.html">
+    <template name="title">
+      <title th:text="|${post?.spec?.title} - ${site.title}|"></title>
+    </template>
+
     <div class="post-content">
       <div class="page-main">
         <div class="page-img_content">

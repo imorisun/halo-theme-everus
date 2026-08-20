@@ -561,6 +561,12 @@ function initPageContent() {
 
 function animateParagraphs() {
   if (typeof gsap === 'undefined') return;
+  // ScrollTrigger 是与 gsap 分开的一个 CDN 文件，可能单独加载失败。
+  // 若不判断就调用 registerPlugin(ScrollTrigger) 会抛 ReferenceError，
+  // 从而中断 initPageContent() 里后续的全部初始化（导航高亮、图片灯箱包裹、
+  // 点赞状态回填），并让每次 PJAX 跳转都退化成整页刷新。
+  // 这里直接跳过动画即可：.up 元素在 CSS 中没有 opacity:0，内容依然正常可见。
+  if (typeof ScrollTrigger === 'undefined') return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   gsap.registerPlugin(ScrollTrigger);
 
@@ -610,6 +616,7 @@ function setActiveLink() {
 (function () {
   var CONTAINER_ID = 'pjax-container';
   var TRANSITION_MS = 250;
+  var NAV_TIMEOUT_MS = 10000; // 单次跳转的最长等待时间，超时则回退为整页跳转
   var isNavigating = false;
 
   // 拦截内部链接点击
@@ -670,13 +677,23 @@ function setActiveLink() {
       container.classList.add('is-loading');
     }
 
+    // 给 fetch 加上超时与中断能力。
+    // 若不加：请求悬挂（弱网、连接被挂住）时 Promise 永不 settle，
+    // isNavigating 一直是 true，加载遮罩不会消失，而且此后所有链接点击
+    // 都会被本函数开头的 isNavigating 判断吞掉 —— 表现为「整站点不动」。
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timeoutId = setTimeout(function () {
+      if (controller) controller.abort();
+    }, NAV_TIMEOUT_MS);
+
     Promise.all([
-      fetch(url).then(function (r) {
+      fetch(url, controller ? { signal: controller.signal } : undefined).then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.text();
       }),
       new Promise(function (resolve) { setTimeout(resolve, TRANSITION_MS); })
     ]).then(function (results) {
+      clearTimeout(timeoutId);
       var html = results[0];
       var doc = new DOMParser().parseFromString(html, 'text/html');
 
@@ -766,7 +783,9 @@ function setActiveLink() {
         });
       });
     }).catch(function () {
-      // 任何错误 → 回退到正常跳转，同时移除加载状态
+      // 任何错误（含超时中断）→ 回退到正常跳转，同时移除加载状态
+      clearTimeout(timeoutId);
+      isNavigating = false;
       if (container) container.classList.remove('is-loading');
       window.location.href = url;
     });

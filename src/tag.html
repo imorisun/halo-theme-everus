@@ -1,4 +1,8 @@
-﻿<include src="layout.html">
+<include src="layout.html">
+    <template name="title">
+      <title th:text="|${tag?.spec?.displayName ?: '标签'} - ${site.title}|"></title>
+    </template>
+
     <div class="archive-page archive-page--tag" th:style="|--tag-color:${tag?.spec?.color ?: '#26a760'}|">
 
       <!-- ====== Hero 头部 ====== -->

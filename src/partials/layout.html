@@ -4,27 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#000000" />
-    <meta name="keywords" th:content="${site.seo.keywords}" />
-    <meta name="description" th:content="${not #strings.isEmpty(site.seo.description) ? site.seo.description : site.title}" />
+    <!--
+      不要在此手写 description / keywords / og:* / twitter:* / canonical。
+      Halo 会在运行时针对当前页面（文章 / 分类 / 标签 / 作者…）自动注入这些标签。
+      此前手写的版本全部取站点级常量，造成两个问题：
+        1. 与 Halo 自动注入的标签重复；
+        2. 文章页被分享时显示的是站点标题与站点简介，而非该文章自身的标题与摘要。
+      （og:image 之前用的是 site.favicon —— 网站图标尺寸远达不到社交卡片要求。）
+    -->
 
-    <!-- 资源预连接 -->
-    <link rel="preconnect" href="https://at.alicdn.com" crossorigin />
+    <!-- 资源预连接（图标字体已自托管，故不再需要 at.alicdn.com） -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-
-    <!-- Open Graph -->
-    <meta property="og:site_name" th:content="${site.title}" />
-    <meta property="og:title" th:content="${site.title}" />
-    <meta property="og:description" th:content="${not #strings.isEmpty(site.seo.description) ? site.seo.description : site.title}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" th:content="${site.url}" />
-    <th:block th:if="${not #strings.isEmpty(site.favicon)}">
-      <meta property="og:image" th:content="${site.favicon}" />
-    </th:block>
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" th:content="${site.title}" />
-    <meta name="twitter:description" th:content="${not #strings.isEmpty(site.seo.description) ? site.seo.description : site.title}" />
 
     <th:block th:if="${#strings.isEmpty(site.favicon)}">
       <link rel="shortcut icon" th:href="@{/assets/images/logo.svg}" />
@@ -37,7 +27,10 @@
       <link rel="apple-touch-icon" sizes="180x180" th:href="${site.favicon}" />
     </th:block>
 
-    <title th:text="${site.title}"></title>
+    <!-- 页面标题：各页面用 <template name="title"> 覆盖，未覆盖时回退为站点名 -->
+    <slot name="title">
+      <title th:text="${site.title}"></title>
+    </slot>
 
     <!-- Styles -->
     <link rel="stylesheet" th:href="@{/assets/css/icon.css?v={v}(v=${theme.spec.version})}" />
@@ -213,7 +206,6 @@
            rel="noopener"
            th:text="${theme.config.footer.gongan}"></a>
       </div>
-      <halo:footer />
     </footer>
 
     <!-- 音乐播放器 — 仅在配置了歌单后加载 -->

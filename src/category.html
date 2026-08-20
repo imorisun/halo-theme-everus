@@ -1,6 +1,6 @@
 <include src="layout.html">
     <template name="title">
-      <title th:text="|${category?.spec?.displayName ?: '分类'} - ${site.title}|"></title>
+      <title th:text="|${category?.spec?.displayName ?: #messages.msg('common.categories')} - ${site.title}|"></title>
     </template>
 
     <div class="archive-page archive-page--category">
@@ -9,9 +9,9 @@
       <header class="archive-hero" th:if="${category?.spec?.displayName}" th:classappend="${not #strings.isEmpty(category?.spec?.cover)} ? 'archive-hero--thumb' : ''">
         <div class="archive-hero__inner">
           <nav class="archive-hero__breadcrumb">
-            <a th:href="@{/}">首页</a>
+            <a th:href="@{/}" th:text="#{common.home}">首页</a>
             <span class="archive-hero__breadcrumb-sep">/</span>
-            <a th:href="@{/categories}">分类</a>
+            <a th:href="@{/categories}" th:text="#{common.categories}">分类</a>
             <span class="archive-hero__breadcrumb-sep">/</span>
             <span class="archive-hero__breadcrumb-cur" th:text="${category?.spec?.displayName}"></span>
           </nav>
@@ -25,11 +25,11 @@
             <span class="hero-badge hero-badge--accent">
               <i class="Nug Nug-wenzhang"></i>
               <span th:text="${posts?.total ?: 0}"></span>
-              <span>篇文章</span>
+              <span th:text="#{unit.posts}">篇文章</span>
             </span>
             <span class="hero-badge hero-badge--muted" th:if="${(posts?.totalPages ?: 0) > 1}">
               <i class="Nug Nug-riqi"></i>
-              <span th:text="|第 ${posts?.page ?: 1} / ${posts?.totalPages ?: 1} 页|"></span>
+              <span th:text="#{pagination.pageOf(${posts?.page ?: 1}, ${posts?.totalPages ?: 1})}"></span>
             </span>
           </div>
 
@@ -46,7 +46,7 @@
         <div class="archive-hero__inner">
           <h1 class="archive-hero__title">
             <span class="archive-hero__kicker">Category</span>
-            <span>分类</span>
+            <span th:text="#{common.categories}">分类</span>
           </h1>
         </div>
       </header>
@@ -56,7 +56,7 @@
 
         <!-- 文章卡片网格 -->
         <div class="archive-body__main">
-          <th:block th:replace="~{modules/post-card-list :: post-card-list(posts=${posts}, emptyTitle='暂无文章', emptyDesc='该分类正在等待第一篇文章。')}"></th:block>
+          <th:block th:replace="~{modules/post-card-list :: post-card-list(posts=${posts}, emptyTitle=${#messages.msg('post.empty')}, emptyDesc=${#messages.msg('post.emptyByCategory')})}"></th:block>
         </div>
 
         <!-- ====== 侧边栏 ====== -->
@@ -64,29 +64,29 @@
           <div class="archive-sidebar__card">
             <div class="archive-sidebar__stat">
               <span class="archive-sidebar__stat-num" th:text="${posts?.total ?: 0}"></span>
-              <span class="archive-sidebar__stat-label">篇文章</span>
+              <span class="archive-sidebar__stat-label" th:text="#{unit.posts}">篇文章</span>
             </div>
             <div class="archive-sidebar__stat" th:if="${(posts?.totalPages ?: 0) > 1}">
               <span class="archive-sidebar__stat-num" th:text="${posts?.totalPages ?: 1}"></span>
-              <span class="archive-sidebar__stat-label">页</span>
+              <span class="archive-sidebar__stat-label" th:text="#{unit.page}">页</span>
             </div>
           </div>
 
           <div class="archive-sidebar__card" th:if="${not #strings.isEmpty(category?.spec?.description)}">
-            <h3 class="archive-sidebar__heading">关于</h3>
+            <h3 class="archive-sidebar__heading" th:text="#{common.about}">关于</h3>
             <p class="archive-sidebar__text" th:text="${category.spec.description}"></p>
           </div>
 
           <nav class="archive-sidebar__card">
-            <h3 class="archive-sidebar__heading">快捷链接</h3>
+            <h3 class="archive-sidebar__heading" th:text="#{common.quickLinks}">快捷链接</h3>
             <a th:href="@{/categories}" class="archive-sidebar__link">
-              <i class="Nug Nug-wenzhang2"></i> 所有分类
+              <i class="Nug Nug-wenzhang2"></i> <span th:text="#{common.allCategories}">所有分类</span>
             </a>
             <a th:href="@{/archives}" class="archive-sidebar__link">
-              <i class="Nug Nug-riqi"></i> 归档
+              <i class="Nug Nug-riqi"></i> <span th:text="#{common.archives}">归档</span>
             </a>
             <a th:href="@{/tags}" class="archive-sidebar__link">
-              <i class="Nug Nug-biaoqian"></i> 标签
+              <i class="Nug Nug-biaoqian"></i> <span th:text="#{common.tags}">标签</span>
             </a>
           </nav>
         </aside>

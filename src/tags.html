@@ -1,6 +1,6 @@
 <include src="layout.html">
     <template name="title">
-      <title th:text="|标签 - ${site.title}|"></title>
+      <title th:text="|#{common.tags} - ${site.title}|"></title>
     </template>
 
     <div class="archive-page archive-page--tags">
@@ -9,21 +9,21 @@
       <header class="archive-hero">
         <div class="archive-hero__inner">
           <nav class="archive-hero__breadcrumb">
-            <a th:href="@{/}">首页</a>
+            <a th:href="@{/}" th:text="#{common.home}">首页</a>
             <span class="archive-hero__breadcrumb-sep">/</span>
-            <span class="archive-hero__breadcrumb-cur">标签</span>
+            <span class="archive-hero__breadcrumb-cur" th:text="#{common.tags}">标签</span>
           </nav>
 
           <h1 class="archive-hero__title">
             <span class="archive-hero__kicker">Tags</span>
-            <span>全部标签</span>
+            <span th:text="#{tags.allTitle}">全部标签</span>
           </h1>
 
           <div class="archive-hero__meta" th:if="${tags != null and not tags.isEmpty()}">
             <span class="hero-badge hero-badge--accent">
               <i class="Nug Nug-biaoqian"></i>
               <span th:text="${tags.size()}"></span>
-              <span>个标签</span>
+              <span th:text="#{unit.tagCount}">个标签</span>
             </span>
           </div>
         </div>
@@ -44,8 +44,8 @@
         <div class="archive-empty__icon">
           <i class="Nug Nug-biaoqian"></i>
         </div>
-        <h2>暂无标签</h2>
-        <p>标签创建后会显示在这里。</p>
+        <h2 th:text="#{tags.empty}">暂无标签</h2>
+        <p th:text="#{tags.emptyDesc}">标签创建后会显示在这里。</p>
       </div>
     </div>
 </include>

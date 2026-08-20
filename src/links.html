@@ -1,6 +1,6 @@
 <include src="layout.html">
     <template name="title">
-      <title th:text="|${linksTitle ?: '友情链接'} - ${site.title}|"></title>
+      <title th:text="|${linksTitle ?: #messages.msg('links.title')} - ${site.title}|"></title>
     </template>
 
     <div class="archive-page archive-page--links">
@@ -9,21 +9,21 @@
       <header class="archive-hero">
         <div class="archive-hero__inner">
           <nav class="archive-hero__breadcrumb">
-            <a th:href="@{/}">首页</a>
+            <a th:href="@{/}" th:text="#{common.home}">首页</a>
             <span class="archive-hero__breadcrumb-sep">/</span>
-            <span class="archive-hero__breadcrumb-cur" th:text="${linksTitle} ?: '链接'"></span>
+            <span class="archive-hero__breadcrumb-cur" th:text="${linksTitle ?: #messages.msg('common.links')}"></span>
           </nav>
 
           <h1 class="archive-hero__title">
             <span class="archive-hero__kicker">Links</span>
-            <span th:text="${linksTitle} ?: '友情链接'"></span>
+            <span th:text="${linksTitle ?: #messages.msg('links.title')}"></span>
           </h1>
 
           <div class="archive-hero__meta" th:if="${not links.isEmpty()}">
             <span class="hero-badge hero-badge--accent">
               <i class="Nug Nug-lianjie"></i>
               <span th:text="${links.size()}"></span>
-              <span>个链接</span>
+              <span th:text="#{unit.linkCount}">个链接</span>
             </span>
           </div>
         </div>
@@ -33,7 +33,7 @@
       <nav class="link-groups" th:if="${not simpleGroups.isEmpty()}">
         <a class="link-groups__tab"
            th:classappend="${group == null ? 'is-active' : ''}"
-           th:href="@{/links}">全部</a>
+           th:href="@{/links}" th:text="#{common.all}">全部</a>
         <a class="link-groups__tab"
            th:each="item : ${simpleGroups}"
            th:href="@{/links(group=${item.metadata.name})}"
@@ -82,8 +82,8 @@
         <div class="archive-empty__icon">
           <i class="Nug Nug-lianjie"></i>
         </div>
-        <h2>暂无链接</h2>
-        <p>链接添加后会显示在这里。</p>
+        <h2 th:text="#{links.empty}">暂无链接</h2>
+        <p th:text="#{links.emptyDesc}">链接添加后会显示在这里。</p>
       </div>
 
       <!-- ====== 评论区域 ====== -->

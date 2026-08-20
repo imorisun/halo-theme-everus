@@ -1,6 +1,6 @@
 <include src="layout.html">
     <template name="title">
-      <title th:text="|瞬间 - ${site.title}|"></title>
+      <title th:text="|#{common.moments} - ${site.title}|"></title>
     </template>
 
     <div class="archive-page archive-page--moments">
@@ -9,14 +9,14 @@
       <header class="archive-hero">
         <div class="archive-hero__inner">
           <nav class="archive-hero__breadcrumb">
-            <a th:href="@{/}">首页</a>
+            <a th:href="@{/}" th:text="#{common.home}">首页</a>
             <span class="archive-hero__breadcrumb-sep">/</span>
-            <span class="archive-hero__breadcrumb-cur">瞬间</span>
+            <span class="archive-hero__breadcrumb-cur" th:text="#{common.moments}">瞬间</span>
           </nav>
 
           <h1 class="archive-hero__title">
             <span class="archive-hero__kicker">Moments</span>
-            <span th:text="${#lists.isEmpty(param.tag) ? '所有瞬间' : '#' + param.tag[0]}"></span>
+            <span th:text="${#lists.isEmpty(param.tag) ? #messages.msg('moments.all') : '#' + param.tag[0]}"></span>
           </h1>
 
           <div class="archive-hero__meta" th:if="${moments?.total != null}">
@@ -34,7 +34,7 @@
                 <line x1="14.12" y1="9.88" x2="19.07" y2="4.93"/>
               </svg>
               <span th:text="${moments?.total ?: 0}"></span>
-              <span>条动态</span>
+              <span th:text="#{unit.momentCount}">条动态</span>
             </span>
           </div>
         </div>
@@ -44,9 +44,14 @@
       <div class="moments-tags" th:if="${tags != null and not tags.isEmpty()}">
         <a th:href="@{/moments}"
            th:classappend="${#lists.isEmpty(param.tag) ? 'moments-tags__item--active' : ''}"
-           class="moments-tags__item">全部</a>
+           class="moments-tags__item" th:text="#{common.all}">全部</a>
+        <!--
+          用 @{/moments(tag=...)} 而非字符串拼接 |/moments?tag=...|：
+          后者绕过 Thymeleaf 的 URL 处理，在 Halo 部署于子路径时会失效，
+          且标签名不会被 URL 编码。
+        -->
         <a th:each="tag : ${tags}"
-           th:href="|/moments?tag=${tag.name}|"
+           th:href="@{/moments(tag=${tag.name})}"
            th:classappend="${#lists.contains(param.tag, tag.name) ? 'moments-tags__item--active' : ''}"
            class="moments-tags__item"
            th:text="${tag.name} + ' (' + ${tag.momentCount} + ')'"></a>
@@ -66,9 +71,9 @@
               <img class="moment-card__avatar"
                    th:unless="${moment?.owner?.avatar}"
                    th:src="@{/assets/images/avatar.jpg}"
-                   th:alt="${moment.owner?.displayName ?: '用户'}" />
+                   th:alt="${moment.owner?.displayName ?: #messages.msg('common.anonymous')}" />
               <div class="moment-card__meta">
-                <span class="moment-card__name" th:text="${moment.owner?.displayName ?: '用户'}"></span>
+                <span class="moment-card__name" th:text="${moment.owner?.displayName ?: #messages.msg('common.anonymous')}"></span>
                 <time class="moment-card__time" th:if="${moment.spec?.releaseTime}"
                       th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}"></time>
               </div>
@@ -124,8 +129,8 @@
         <div class="archive-empty__icon">
           <i class="Nug Nug-biaoqian"></i>
         </div>
-        <h2>暂无瞬间</h2>
-        <p>发布第一条瞬间吧。</p>
+        <h2 th:text="#{moments.empty}">暂无瞬间</h2>
+        <p th:text="#{moments.emptyDesc}">发布第一条瞬间吧。</p>
       </div>
     </div>
 </include>

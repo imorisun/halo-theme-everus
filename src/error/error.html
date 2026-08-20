@@ -1,6 +1,6 @@
 <include src="layout.html">
     <template name="title">
-      <title th:text="|${#strings.defaultString(error?.title, '出错了')} - ${site.title}|"></title>
+      <title th:text="|${#strings.defaultString(error?.title, #messages.msg('error.title'))} - ${site.title}|"></title>
     </template>
 
     <div class="error-page">
@@ -8,14 +8,14 @@
         <div class="error-page__code">
           <span th:text="${error?.status ?: '!'}">404</span>
         </div>
-        <h1 class="error-page__title" th:text="${#strings.defaultString(error?.title, 'Page Not Found')}">Page Not Found</h1>
+        <h1 class="error-page__title" th:text="${#strings.defaultString(error?.title, #messages.msg('error.title'))}">Page Not Found</h1>
         <p class="error-page__desc" th:if="${not #strings.isEmpty(error?.detail)}" th:text="${error.detail}"></p>
-        <p class="error-page__desc" th:unless="${not #strings.isEmpty(error?.detail)}">
+        <p class="error-page__desc" th:unless="${not #strings.isEmpty(error?.detail)}" th:text="#{error.desc}">
           你寻找的页面可能已被移除、重命名，或者从未存在过。
         </p>
         <div class="error-page__actions">
-          <a th:href="@{/}" class="error-page__btn error-page__btn--primary">回到首页</a>
-          <a href="javascript:history.back()" class="error-page__btn">返回上页</a>
+          <a th:href="@{/}" class="error-page__btn error-page__btn--primary" th:text="#{error.backHome}">回到首页</a>
+          <a href="javascript:history.back()" class="error-page__btn" th:text="#{error.goBack}">返回上页</a>
         </div>
       </div>
     </div>

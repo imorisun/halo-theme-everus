@@ -28,6 +28,11 @@ spec:
     - group: footer
       label: 页脚
       formSchema:
+        - $formkit: switch
+          name: show_slogan
+          label: 显示页脚标语
+          value: true
+          help: "页脚顶部的「爱我中华」标语与国旗图标。关闭后页脚仅保留版权与备案信息"
         - $formkit: text
           name: custom_text
           label: 自定义页脚文字

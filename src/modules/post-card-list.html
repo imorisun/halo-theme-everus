@@ -23,7 +23,7 @@
             <time th:if="${post?.spec?.publishTime}"
                   th:text="${#temporals.format(post.spec.publishTime, 'yyyy-MM-dd')}"></time>
             <span th:if="${(post?.status?.commentsCount ?: 0) > 0}"
-                  th:text="${post?.status?.commentsCount} + ' 评论'"></span>
+                  th:text="|${post?.status?.commentsCount} #{unit.commentCount}|"></span>
           </div>
 
           <p class="post-card__excerpt line-clamp"

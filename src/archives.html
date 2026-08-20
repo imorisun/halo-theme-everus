@@ -1,13 +1,13 @@
 <include src="layout.html">
     <template name="title">
-      <title th:text="|归档 - ${site.title}|"></title>
+      <title th:text="|#{common.archives} - ${site.title}|"></title>
     </template>
 
     <div class="archives">
       <div class="page-content" style="padding: 3rem 2rem;">
         <div class="cat-group">
           <header class="cat-header up">
-            <h2 class="cat-header__title">归档</h2>
+            <h2 class="cat-header__title" th:text="#{common.archives}">归档</h2>
             <div class="cat-header__line"></div>
             <span class="cat-header__count"></span>
           </header>
@@ -25,7 +25,7 @@
               </ul>
             </div>
           </div>
-          <div th:unless="${archives.items != null and not archives.items.isEmpty()}" class="empty-state">
+          <div th:unless="${archives.items != null and not archives.items.isEmpty()}" class="empty-state" th:text="#{archives.empty}">
             暂无归档。
           </div>
         </div>

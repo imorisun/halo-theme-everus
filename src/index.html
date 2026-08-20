@@ -1,4 +1,4 @@
-﻿<include src="layout.html">
+<include src="layout.html">
     <div class="page-content">
       <!-- Banner -->
       <header class="banner banner--love" th:style="'background-image:url(' + ${#strings.isEmpty(theme.config?.homepage?.banner_image) ? #theme.assets('/images/bg.jpg') : theme.config?.homepage?.banner_image} + ');background-size:cover;'">
@@ -12,7 +12,7 @@
           <!-- 最新文章 -->
           <li class="cat-group__item">
             <header class="cat-header up">
-              <h2 class="cat-header__title">最新文章</h2>
+              <h2 class="cat-header__title" th:text="#{index.latestPosts}">最新文章</h2>
               <div class="cat-header__line"></div>
               <span class="cat-header__count"></span>
             </header>
@@ -25,17 +25,17 @@
                     <a class="link hover-link" th:href="@{${post?.status?.permalink}}" th:text="${post?.spec?.title}"></a>
                   </h3>
                   <p class="line-clamp" th:if="${post?.status?.excerpt}" th:text="${post?.status?.excerpt}"></p>
-                  <a class="link hover-link" th:href="@{${post?.status?.permalink}}">展开我的故事</a>
+                  <a class="link hover-link" th:href="@{${post?.status?.permalink}}" th:text="#{index.readMore}">展开我的故事</a>
                 </li>
                 <li class="cat-posts__more">
                   <a th:href="@{/archives}" class="more-link">
-                    <span>全部文章</span>
-                    <span class="more-link__count"><em th:text="${posts?.total ?: 0}"></em> 篇</span>
+                    <span th:text="#{index.allPosts}">全部文章</span>
+                    <span class="more-link__count"><em th:text="${posts?.total ?: 0}"></em> <span th:text="#{unit.postsShort}">篇</span></span>
                     <i class="Nug Nug-youbian"></i>
                   </a>
                 </li>
               </th:block>
-              <li th:unless="${posts?.items != null and not posts.items.isEmpty()}" class="empty-state">
+              <li th:unless="${posts?.items != null and not posts.items.isEmpty()}" class="empty-state" th:text="#{index.noPosts}">
                 开始写下你的第一篇故事吧。
               </li>
             </ul>
@@ -46,7 +46,7 @@
             <th:block th:with="homeMoments=${momentFinder.list(1, 6)}">
               <li class="cat-group__item" th:if="${homeMoments?.items != null and not homeMoments.items.isEmpty()}">
                 <header class="cat-header up">
-                  <h2 class="cat-header__title">最新动态</h2>
+                  <h2 class="cat-header__title" th:text="#{index.latestMoments}">最新动态</h2>
                   <div class="cat-header__line"></div>
                   <span class="cat-header__count"></span>
                 </header>
@@ -57,8 +57,8 @@
                       <div class="home-moment__user">
                         <img class="home-moment__avatar"
                              th:src="${moment?.owner?.avatar ?: #theme.assets('/images/avatar.jpg')}"
-                             th:alt="${moment?.owner?.displayName ?: '用户'}" />
-                        <span class="home-moment__name" th:text="${moment?.owner?.displayName ?: '用户'}"></span>
+                             th:alt="${moment?.owner?.displayName ?: #messages.msg('common.anonymous')}" />
+                        <span class="home-moment__name" th:text="${moment?.owner?.displayName ?: #messages.msg('common.anonymous')}"></span>
                         <time class="home-moment__time" th:if="${moment.spec?.releaseTime}"
                               th:text="${#temporals.format(moment.spec.releaseTime, 'yyyy-MM-dd HH:mm')}"></time>
                       </div>
@@ -98,8 +98,8 @@
                   <!-- 查看更多 -->
                   <li class="cat-posts__more" th:if="${homeMoments?.total > 6}">
                     <a th:href="@{/moments}" class="more-link">
-                      <span>全部动态</span>
-                      <span class="more-link__count"><em th:text="${homeMoments.total}"></em> 条</span>
+                      <span th:text="#{index.allMoments}">全部动态</span>
+                      <span class="more-link__count"><em th:text="${homeMoments.total}"></em> <span th:text="#{unit.momentsShort}">条</span></span>
                       <i class="Nug Nug-youbian"></i>
                     </a>
                   </li>
@@ -112,7 +112,7 @@
           <li class="cat-group__item">
             <header>
               <div class="cat-header__line"></div>
-              <p class="cat__quote up">一片心意，一点梦想，一段生活——感谢阅读。故事还在 <a th:href="@{/}" class="text-link" th:text="${site.title}"></a> 继续，期待你的陪伴。</p>
+              <p class="cat__quote up"><span th:text="#{index.quoteBefore}">一片心意，一点梦想，一段生活——感谢阅读。故事还在</span> <a th:href="@{/}" class="text-link" th:text="${site.title}"></a> <span th:text="#{index.quoteAfter}">继续，期待你的陪伴。</span></p>
             </header>
           </li>
         </ul>

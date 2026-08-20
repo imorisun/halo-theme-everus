@@ -38,11 +38,11 @@
 
               <div class="post-footer up">
                 <div class="post-author">
-                  <span>作者：</span>
+                  <span th:text="#{post.authorLabel}">作者：</span>
                   <a class="text-link" th:href="@{${post?.owner?.permalink}}" th:text="${post?.owner?.displayName}"></a>
                 </div>
                 <div class="post-date">
-                  <span>发布时间：</span>
+                  <span th:text="#{post.publishTimeLabel}">发布时间：</span>
                   <th:block th:text="${post?.spec?.publishTime != null ? #temporals.format(post.spec.publishTime, 'yyyy-MM-dd') : ''}"></th:block>
                 </div>
               </div>

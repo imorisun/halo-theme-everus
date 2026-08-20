@@ -18,7 +18,7 @@
 
                 <div class="post-footer up">
                   <div class="post-date">
-                    <span>发布时间：</span>
+                    <span th:text="#{post.publishTimeLabel}">发布时间：</span>
                     <th:block th:text="${#temporals.format(singlePage.spec.publishTime, 'yyyy-MM-dd')}"></th:block>
                   </div>
                 </div>

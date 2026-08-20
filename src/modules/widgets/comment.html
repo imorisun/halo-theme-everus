@@ -4,7 +4,7 @@
   </th:block>
   <th:block th:unless="${haloCommentEnabled}">
     <div id="comments" class="comment-area">
-      <div class="comment-disbtn">评论已关闭</div>
+      <div class="comment-disbtn" th:text="#{comment.disabled}">评论已关闭</div>
     </div>
   </th:block>
 </aside>

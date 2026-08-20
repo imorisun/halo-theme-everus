@@ -13,8 +13,11 @@
       （og:image 之前用的是 site.favicon —— 网站图标尺寸远达不到社交卡片要求。）
     -->
 
-    <!-- 资源预连接（图标字体已自托管，故不再需要 at.alicdn.com） -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <!--
+      第三方库（GSAP / ScrollTrigger / Fancybox）已改为 npm 依赖 + Vite 打包自托管，
+      见 src/js/vendor.js。因此这里不再需要任何 preconnect：
+      整个页面已无第三方运行时请求。
+    -->
 
     <th:block th:if="${#strings.isEmpty(site.favicon)}">
       <link rel="shortcut icon" th:href="@{/assets/images/logo.svg}" />
@@ -36,7 +39,7 @@
     <link rel="stylesheet" th:href="@{/assets/css/icon.css?v={v}(v=${theme.spec.version})}" />
     <link rel="stylesheet" th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}" th:href="@{/assets/js/aplayer/APlayer.min.css?v={v}(v=${theme.spec.version})}" />
     <link rel="stylesheet" th:href="@{/assets/css/style.css?v={v}(v=${theme.spec.version})}" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.css" />
+    <!-- Fancybox 的样式由 src/js/vendor.js 通过 import 引入，Vite 会自动注入对应的 <link> -->
 
     <!-- Custom font -->
     <th:block th:if="${theme.config.style.custom_font}">
@@ -235,13 +238,22 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <!--
+      第三方库入口（GSAP / ScrollTrigger / Fancybox）。
+      type="module" 语义等价于 defer，会在 DOMContentLoaded 之前、
+      且在下面带 defer 的 main.js 之前按文档顺序执行完成。
+    -->
+    <!--
+      注意路径写成 /js/vendor.js（相对 Vite root = src/）而非 ./js/vendor.js：
+      layout.html 会被内联进所有页面入口，其中 error/error.html 位于子目录，
+      用 ./ 会被解析成 src/error/js/vendor.js 而导致构建失败。
+    -->
+    <script type="module" src="/js/vendor.js"></script>
+
     <script th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}" th:src="@{/assets/js/aplayer/APlayer.min.js?v={v}(v=${theme.spec.version})}"></script>
     <script th:if="${not #strings.isEmpty(theme.config?.music?.custom_playlist) or not #strings.isEmpty(theme.config?.music?.music_id)}" th:src="@{/assets/js/aplayer/Meting2.min.js?v={v}(v=${theme.spec.version})}"></script>
 
-    <script th:src="@{/assets/js/main.js?v={v}(v=${theme.spec.version})}"></script>
+    <script defer th:src="@{/assets/js/main.js?v={v}(v=${theme.spec.version})}"></script>
 
     <halo:footer />
   </body>

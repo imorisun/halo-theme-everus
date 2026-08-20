@@ -42,6 +42,23 @@
     <link rel="stylesheet" th:href="@{/assets/css/style.css?v={v}(v=${theme.spec.version})}" />
     <!-- Fancybox 的样式由 src/js/vendor.js 通过 import 引入，Vite 会自动注入对应的 <link> -->
 
+    <!-- 主题色：仅覆盖主色及衍生变量，其余设计令牌保持默认 -->
+    <th:block th:if="${not #strings.isEmpty(theme.config?.style?.accent_color)}">
+      <style th:inline="text">
+        :root {
+          --color-primary: [[${theme.config.style.accent_color}]];
+          --color-primary-hover: color-mix(in srgb, [[${theme.config.style.accent_color}]] 80%, #ffffff);
+          --color-primary-alpha-sm: color-mix(in srgb, [[${theme.config.style.accent_color}]] 6%, transparent);
+          --color-primary-alpha: color-mix(in srgb, [[${theme.config.style.accent_color}]] 10%, transparent);
+          --color-primary-alpha-md: color-mix(in srgb, [[${theme.config.style.accent_color}]] 18%, transparent);
+          --color-primary-alpha-lg: color-mix(in srgb, [[${theme.config.style.accent_color}]] 25%, transparent);
+          --color-primary-alpha-xl: color-mix(in srgb, [[${theme.config.style.accent_color}]] 30%, transparent);
+          --halo-cw-primary-2-color: color-mix(in srgb, [[${theme.config.style.accent_color}]] 70%, transparent);
+          --halo-cw-primary-3-color: color-mix(in srgb, [[${theme.config.style.accent_color}]] 20%, transparent);
+        }
+      </style>
+    </th:block>
+
     <!-- Custom font -->
     <th:block th:if="${theme.config.style.custom_font}">
       <style th:inline="text">
@@ -59,11 +76,29 @@
       </style>
     </th:block>
 
+    <!-- 自定义 CSS：追加在主题样式之后，可覆盖默认样式 -->
+    <th:block th:if="${not #strings.isEmpty(theme.config?.style?.custom_css)}">
+      <style th:inline="text">[[${theme.config.style.custom_css}]]</style>
+    </th:block>
+
     <!-- 页面自定义 head 内容（通过 <template name="head"> 注入） -->
     <slot name="head"></slot>
+
+    <!-- 自定义 head 代码（统计代码、验证 meta 标签等） -->
+    <th:block th:utext="${theme.config?.global?.head_code}"></th:block>
   </head>
 
   <body class="dark">
+    <!-- 粒子背景（跟随主题色，位于所有内容之下） -->
+    <canvas id="everus-particles" class="particles-canvas" aria-hidden="true"
+            th:if="${theme.config?.global?.particles_enabled ?: false}"
+            th:attr="data-count=${theme.config?.global?.particles_count ?: 60}"></canvas>
+
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" aria-hidden="true" th:if="${theme.config?.global?.show_reading_progress ?: true}">
+      <div class="reading-progress__bar" id="reading-progress-bar"></div>
+    </div>
+
     <!-- Navigation -->
     <div th:with="menu = ${menuFinder.getPrimary()}">
       <div class="site-nav">
@@ -202,6 +237,11 @@
             © <span th:text="${#dates.year(#dates.createNow())}"></span>. <a class="text-link" th:href="@{/}" th:text="${site.title}"></a> | <span th:text="#{footer.tagline}">记录，即是确认我仍在场。</span>
           </th:block>
         </div>
+        <!-- 站点运行时间（JS 根据成立日期渲染） -->
+        <div class="footer-runtime"
+             th:if="${(theme.config?.global?.show_runtime ?: false) and not #strings.isEmpty(theme.config?.global?.site_start_date)}">
+          <span data-everus-runtime th:attr="data-start-date=${theme.config.global.site_start_date}"></span>
+        </div>
         <a th:if="${not #strings.isEmpty(theme.config?.footer?.icp)}"
            class="footer-beian"
            href="https://beian.miit.gov.cn"
@@ -261,6 +301,22 @@
 
     <script defer th:src="@{/assets/js/main.js?v={v}(v=${theme.spec.version})}"></script>
 
+    <!-- JS 所需界面文案（随语言包切换） -->
+    <script th:inline="javascript">
+      window.__EVERUS_I18N__ = {
+        copyCode: /*[[#{post.copyCode}]]*/ '复制代码',
+        copied: /*[[#{post.copied}]]*/ '已复制',
+        wordCount: /*[[#{post.wordCount}]]*/ '字',
+        readTime: /*[[#{post.readTime}]]*/ '分钟读完',
+        runtimePrefix: /*[[#{footer.runtimePrefix}]]*/ '本站已运行',
+        runtimeYear: /*[[#{footer.runtimeYear}]]*/ '年',
+        runtimeDay: /*[[#{footer.runtimeDay}]]*/ '天'
+      };
+    </script>
+
     <halo:footer />
+
+    <!-- 页脚自定义代码（统计脚本、客服组件等） -->
+    <th:block th:utext="${theme.config?.global?.footer_code}"></th:block>
   </body>
 </html>

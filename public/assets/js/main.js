@@ -107,6 +107,83 @@ function toggleMomentComments(name) {
   });
 }
 
+/* ---------  文章点赞  --------- */
+var POST_UPVOTE_STORAGE_KEY = 'halo.upvoted.post.names';
+
+function getUpvotedPostNames() {
+  try {
+    var parsed = JSON.parse(localStorage.getItem(POST_UPVOTE_STORAGE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function isPostUpvoted(name) {
+  return getUpvotedPostNames().indexOf(name) !== -1;
+}
+
+var _everusPostUpvoteInFlight = {};
+
+function handlePostUpvote(btn, name) {
+  if (isPostUpvoted(name)) return;
+  if (_everusPostUpvoteInFlight[name]) return;
+  _everusPostUpvoteInFlight[name] = true;
+
+  var done = function () { delete _everusPostUpvoteInFlight[name]; };
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/apis/api.halo.run/v1alpha1/trackers/upvote');
+  xhr.setRequestHeader('Content-Type', 'application/json');
+
+  xhr.onload = function () {
+    done();
+    if (xhr.status < 200 || xhr.status >= 300) return;
+
+    var names = getUpvotedPostNames();
+    names.push(name);
+    try {
+      localStorage.setItem(POST_UPVOTE_STORAGE_KEY, JSON.stringify(names));
+    } catch (e) {}
+
+    document.querySelectorAll('[data-upvote-post-name="' + name + '"]').forEach(function (span) {
+      var count = parseInt(span.textContent || '0', 10);
+      if (isNaN(count)) count = 0;
+      span.textContent = (count + 1) + '';
+    });
+
+    markPostLiked(name);
+  };
+
+  xhr.onerror = function () {
+    done();
+    console.error('[EverUs] 点赞失败，请稍后再试');
+  };
+
+  xhr.send(JSON.stringify({
+    group: 'content.halo.run',
+    plural: 'posts',
+    name: name
+  }));
+}
+
+function markPostLiked(name) {
+  document.querySelectorAll('[data-upvote-post-name="' + name + '"]').forEach(function (span) {
+    var btn = span.closest('.post-upvote');
+    if (btn) {
+      btn.classList.add('is-liked');
+      btn.setAttribute('aria-pressed', 'true');
+      btn.setAttribute('aria-disabled', 'true');
+    }
+  });
+}
+
+function initPostUpvotes() {
+  getUpvotedPostNames().forEach(function (name) {
+    markPostLiked(name);
+  });
+}
+
 /* ==========  音乐播放器初始化  ========== */
 var _everusPlayer = null;
 
@@ -345,6 +422,323 @@ function _everusInitMusic() {
   }
 }
 
+/* ==========  JS 界面文案  ========== */
+var EVERUS_I18N = window.__EVERUS_I18N__ || {};
+
+/* ==========  阅读进度条  ========== */
+function updateReadingProgress() {
+  var bar = document.getElementById('reading-progress-bar');
+  if (!bar) return;
+  var doc = document.documentElement;
+  var scrollable = doc.scrollHeight - doc.clientHeight;
+  var ratio = scrollable > 0 ? window.scrollY / scrollable : 0;
+  bar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, ratio)) + ')';
+}
+
+function initReadingProgress() {
+  if (!document.getElementById('reading-progress-bar')) return;
+  updateReadingProgress();
+  window.addEventListener('scroll', updateReadingProgress, { passive: true });
+  window.addEventListener('resize', updateReadingProgress, { passive: true });
+}
+
+/* ==========  站点运行时间  ========== */
+function initRuntime() {
+  var el = document.querySelector('[data-everus-runtime]');
+  if (!el) return;
+  var startRaw = el.getAttribute('data-start-date');
+  if (!startRaw) return;
+
+  // 兼容 "2020-01-01" 与 "2020-01-01T00:00:00" 两种格式
+  var start = new Date(startRaw.indexOf('T') === -1 ? startRaw + 'T00:00:00' : startRaw);
+  if (isNaN(start.getTime())) return;
+
+  var render = function () {
+    var diff = Date.now() - start.getTime();
+    if (diff < 0) { el.textContent = ''; return; }
+
+    var days = Math.floor(diff / 86400000);
+    var years = Math.floor(days / 365);
+    var rest = days % 365;
+
+    var parts = [];
+    if (years > 0) parts.push(years + ' ' + (EVERUS_I18N.runtimeYear || '年'));
+    parts.push(rest + ' ' + (EVERUS_I18N.runtimeDay || '天'));
+    el.textContent = (EVERUS_I18N.runtimePrefix || '本站已运行') + ' ' + parts.join(' ');
+  };
+
+  render();
+  setInterval(render, 60000);
+}
+
+/* ==========  粒子背景  ========== */
+function initParticles() {
+  var canvas = document.getElementById('everus-particles');
+  if (!canvas) return;
+  if (canvas.dataset.everusParticles) return;
+  canvas.dataset.everusParticles = '1';
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var count = parseInt(canvas.getAttribute('data-count') || '60', 10);
+  if (isNaN(count) || count < 10) count = 10;
+  if (count > 150) count = 150;
+
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  var resize = function () {
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+  };
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  // 粒子使用归一化坐标（0~1），缩放窗口时无需重新布局
+  var particles = [];
+  for (var i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random(),
+      y: Math.random(),
+      vx: (Math.random() - 0.5) * 0.0008,
+      vy: (Math.random() - 0.5) * 0.0008,
+      r: Math.random() * 1.6 + 0.6
+    });
+  }
+
+  var LINK_DIST = 0.12;
+
+  var step = function () {
+    if (document.hidden) return;
+    var w = canvas.width;
+    var h = canvas.height;
+    var color = getComputedStyle(document.documentElement)
+      .getPropertyValue('--color-primary').trim() || '#26a760';
+
+    ctx.clearRect(0, 0, w, h);
+
+    var i, j, p, q;
+    for (i = 0; i < particles.length; i++) {
+      p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) p.x = 1; else if (p.x > 1) p.x = 0;
+      if (p.y < 0) p.y = 1; else if (p.y > 1) p.y = 0;
+    }
+
+    // 连接线
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1 * dpr;
+    for (i = 0; i < particles.length; i++) {
+      p = particles[i];
+      for (j = i + 1; j < particles.length; j++) {
+        q = particles[j];
+        var dx = p.x - q.x;
+        var dy = p.y - q.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < LINK_DIST) {
+          ctx.globalAlpha = (1 - dist / LINK_DIST) * 0.3;
+          ctx.beginPath();
+          ctx.moveTo(p.x * w, p.y * h);
+          ctx.lineTo(q.x * w, q.y * h);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // 粒子
+    ctx.fillStyle = color;
+    for (i = 0; i < particles.length; i++) {
+      p = particles[i];
+      ctx.globalAlpha = 0.25 + Math.random() * 0.3;
+      ctx.beginPath();
+      ctx.arc(p.x * w, p.y * h, p.r * dpr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  };
+
+  // 只在可见时运行：visibilitychange 切换 rAF 循环
+  var running = true;
+  var loop = function () {
+    if (!running) return;
+    step();
+    requestAnimationFrame(loop);
+  };
+  document.addEventListener('visibilitychange', function () {
+    running = !document.hidden;
+    if (running) loop();
+  });
+  loop();
+}
+
+/* ==========  文章目录（TOC）  ========== */
+function initToc() {
+  var toc = document.getElementById('post-toc');
+  if (!toc) return;
+  if (toc.dataset.everusToc) return;
+  toc.dataset.everusToc = '1';
+
+  var listEl = toc.querySelector('.post-toc__list');
+  var wrapper = toc.parentElement;
+  var article = wrapper ? wrapper.querySelector('.post__content') : null;
+  if (!listEl || !article) return;
+
+  var headings = article.querySelectorAll('h2, h3, h4');
+  // 标题太少时目录没有意义，整体隐藏
+  if (headings.length < 3) return;
+
+  toc.classList.remove('hidden');
+  listEl.innerHTML = '';
+
+  var anchors = [];
+  headings.forEach(function (h, i) {
+    var id = h.getAttribute('id');
+    if (!id) {
+      id = 'everus-heading-' + (i + 1);
+      h.setAttribute('id', id);
+    }
+    var item = document.createElement('a');
+    item.className = 'post-toc__item post-toc__item--' + h.tagName.toLowerCase();
+    item.href = '#' + id;
+    item.textContent = h.textContent;
+    listEl.appendChild(item);
+    anchors.push({ heading: h, link: item });
+  });
+
+  /* ---------  目录点击：显式滚动跳转  --------- */
+  // 不依赖浏览器原生锚点跳转：PJAX 的历史状态管理与第三方插件脚本都可能
+  // 干扰原生 hash 导航，导致「URL 变了但页面不动」。这里用 stopPropagation
+  // 阻断事件继续冒泡到 PJAX 的全局 click 拦截，并手动平滑滚动到目标标题。
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // 固定导航的底部位置（导航 top: 0.5rem + height: 4rem）再留少量呼吸空间
+  var NAV_OFFSET = 80;
+
+  anchors.forEach(function (a) {
+    a.link.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      var target = document.getElementById(a.heading.getAttribute('id'));
+      if (!target) return;
+
+      var y = target.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+      window.scrollTo({ top: Math.max(0, y), behavior: prefersReduced ? 'auto' : 'smooth' });
+
+      // 同步地址栏 hash，但不新增历史记录，避免触发 PJAX 的 popstate 逻辑
+      try {
+        history.replaceState(history.state, '', '#' + a.heading.getAttribute('id'));
+      } catch (err) {}
+
+      // 跳转目标短暂高亮，帮助读者定位
+      target.classList.remove('everus-toc-flash');
+      void target.offsetWidth; // 强制重排以重启动画
+      target.classList.add('everus-toc-flash');
+      setTimeout(function () {
+        target.classList.remove('everus-toc-flash');
+      }, 1500);
+    });
+  });
+
+  // 滚动时高亮当前所在章节
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        anchors.forEach(function (a) {
+          a.link.classList.toggle('is-active', a.heading === entry.target);
+        });
+      });
+    }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+    anchors.forEach(function (a) { observer.observe(a.heading); });
+  }
+}
+
+/* ==========  字数统计与阅读时长  ========== */
+function initMetaStats() {
+  var wordEl = document.querySelector('[data-everus-wordcount]');
+  var timeEl = document.querySelector('[data-everus-readtime]');
+  if (!wordEl && !timeEl) return;
+
+  var content = document.querySelector('.post__content');
+  if (!content) return;
+
+  var text = content.innerText || '';
+  // CJK 字符按「字」计，其余按空格分词计「词」
+  var cjk = (text.match(/[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\u3040-\u30ff\uac00-\ud7af]/g) || []).length;
+  var rest = text.replace(/[\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\u3040-\u30ff\uac00-\ud7af]/g, ' ');
+  var words = (rest.match(/[A-Za-z0-9]+/g) || []).length;
+  var total = cjk + words;
+
+  // 中文约 400 字/分钟、西文约 200 词/分钟
+  var minutes = Math.max(1, Math.ceil(cjk / 400 + words / 200));
+
+  var fmt = function (n) {
+    try { return n.toLocaleString(); } catch (e) { return String(n); }
+  };
+
+  if (wordEl) wordEl.textContent = fmt(total) + ' ' + (EVERUS_I18N.wordCount || '字');
+  if (timeEl) timeEl.textContent = minutes + ' ' + (EVERUS_I18N.readTime || '分钟读完');
+}
+
+/* ==========  代码块复制按钮  ========== */
+function _everusCopyFallback(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.position = 'fixed';
+  ta.style.top = '0';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  var ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+  return ok;
+}
+
+function initCodeCopy() {
+  var containers = document.querySelectorAll('.post__content[data-code-copy="1"]');
+  containers.forEach(function (container) {
+    container.querySelectorAll('pre').forEach(function (pre) {
+      if (pre.dataset.everusCopy) return;
+      pre.dataset.everusCopy = '1';
+      pre.classList.add('has-copy-btn');
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'code-copy-btn';
+      btn.setAttribute('aria-label', EVERUS_I18N.copyCode || '复制代码');
+      btn.innerHTML = '<i class="Nug Nug-fuzhi" aria-hidden="true"></i>';
+
+      btn.addEventListener('click', function () {
+        var code = pre.innerText || '';
+        var onDone = function (ok) {
+          btn.classList.add('is-copied');
+          btn.setAttribute('aria-label', ok ? (EVERUS_I18N.copied || '已复制') : (EVERUS_I18N.copyCode || '复制代码'));
+          setTimeout(function () {
+            btn.classList.remove('is-copied');
+            btn.setAttribute('aria-label', EVERUS_I18N.copyCode || '复制代码');
+          }, 1600);
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(code).then(
+            function () { onDone(true); },
+            function () { onDone(_everusCopyFallback(code)); }
+          );
+        } else {
+          onDone(_everusCopyFallback(code));
+        }
+      });
+
+      pre.appendChild(btn);
+    });
+  });
+}
+
 /* ==========  布局级初始化（仅首次加载执行一次）  ========== */
 function initLayoutOnce() {
   if (window.__everusLayoutReady) return;
@@ -473,6 +867,15 @@ function initLayoutOnce() {
 
   /* ---------  音乐播放器 & 歌单面板（布局元素，仅初始化一次）  --------- */
   _everusInitMusic();
+
+  /* ---------  阅读进度条（布局元素，仅初始化一次）  --------- */
+  initReadingProgress();
+
+  /* ---------  站点运行时间（布局元素，仅初始化一次）  --------- */
+  initRuntime();
+
+  /* ---------  粒子背景（布局元素，仅初始化一次）  --------- */
+  initParticles();
 
   var playlistToggle = document.querySelector('.playlist-toggle');
   var navMusic = document.getElementById('nav-music');
@@ -654,6 +1057,21 @@ function initPageContent() {
 
   /* ---------  初始化瞬间点赞状态  --------- */
   initMomentUpvotes();
+
+  /* ---------  文章目录（PJAX 后重跑）  --------- */
+  initToc();
+
+  /* ---------  字数统计与阅读时长（PJAX 后重跑）  --------- */
+  initMetaStats();
+
+  /* ---------  代码块复制按钮（PJAX 后重跑）  --------- */
+  initCodeCopy();
+
+  /* ---------  文章点赞状态回填（PJAX 后重跑）  --------- */
+  initPostUpvotes();
+
+  /* ---------  阅读进度条随新内容刷新  --------- */
+  updateReadingProgress();
 
   /* ---------  链接页分组 tab 滚动至当前激活项  --------- */
   (function () {

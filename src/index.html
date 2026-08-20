@@ -3,6 +3,12 @@
       <!-- Banner -->
       <header class="banner banner--love" th:style="'background-image:url(' + ${#strings.isEmpty(theme.config?.homepage?.banner_image) ? #theme.assets('/images/bg.jpg') : theme.config?.homepage?.banner_image} + ');background-size:cover;'">
         <div class="banner-overlay"></div>
+        <div class="banner-caption" th:if="${not #strings.isEmpty(theme.config?.homepage?.banner_title) or not #strings.isEmpty(theme.config?.homepage?.banner_subtitle)}">
+          <h1 class="banner-caption__title" th:if="${not #strings.isEmpty(theme.config?.homepage?.banner_title)}"
+              th:text="${theme.config.homepage.banner_title}"></h1>
+          <p class="banner-caption__subtitle" th:if="${not #strings.isEmpty(theme.config?.homepage?.banner_subtitle)}"
+             th:text="${theme.config.homepage.banner_subtitle}"></p>
+        </div>
       </header>
 
       <!-- 主内容区 -->
@@ -10,7 +16,8 @@
         <ul class="cat-group__list">
 
           <!-- 最新文章 -->
-          <li class="cat-group__item">
+          <li class="cat-group__item" th:if="${theme.config?.homepage?.show_latest_posts ?: true}"
+              th:with="count=${theme.config?.homepage?.posts_count ?: 8}, homePosts=${postFinder.list({page: 1, size: (count > 0 ? count : 8), sort: {'spec.publishTime,desc'}})}">
             <header class="cat-header up">
               <h2 class="cat-header__title" th:text="#{index.latestPosts}">最新文章</h2>
               <div class="cat-header__line"></div>
@@ -18,8 +25,8 @@
             </header>
 
             <ul class="cat-posts">
-              <th:block th:if="${posts?.items != null and not posts.items.isEmpty()}">
-                <li class="cat-posts__item up" th:each="post,iterStat : ${posts.items}">
+              <th:block th:if="${homePosts?.items != null and not homePosts.items.isEmpty()}">
+                <li class="cat-posts__item up" th:each="post,iterStat : ${homePosts.items}">
                   <h3 class="line-clamp">
                     <span class="accent"></span>
                     <a class="link hover-link" th:href="@{${post?.status?.permalink}}" th:text="${post?.spec?.title}"></a>
@@ -30,19 +37,19 @@
                 <li class="cat-posts__more">
                   <a th:href="@{/archives}" class="more-link">
                     <span th:text="#{index.allPosts}">全部文章</span>
-                    <span class="more-link__count"><em th:text="${posts?.total ?: 0}"></em> <span th:text="#{unit.postsShort}">篇</span></span>
+                    <span class="more-link__count"><em th:text="${homePosts?.total ?: 0}"></em> <span th:text="#{unit.postsShort}">篇</span></span>
                     <i class="Nug Nug-youbian"></i>
                   </a>
                 </li>
               </th:block>
-              <li th:unless="${posts?.items != null and not posts.items.isEmpty()}" class="empty-state" th:text="#{index.noPosts}">
+              <li th:unless="${homePosts?.items != null and not homePosts.items.isEmpty()}" class="empty-state" th:text="#{index.noPosts}">
                 开始写下你的第一篇故事吧。
               </li>
             </ul>
           </li>
 
           <!-- 最新动态（瞬间插件） -->
-          <th:block th:if="${momentFinder != null}">
+          <th:block th:if="${(theme.config?.homepage?.show_latest_moments ?: true) and momentFinder != null}">
             <th:block th:with="homeMoments=${momentFinder.list(1, 6)}">
               <li class="cat-group__item" th:if="${homeMoments?.items != null and not homeMoments.items.isEmpty()}">
                 <header class="cat-header up">
@@ -111,10 +118,18 @@
           </th:block>
 
           <!-- 结语引用 -->
-          <li class="cat-group__item">
+          <li class="cat-group__item" th:if="${theme.config?.homepage?.show_quote ?: true}">
             <header>
               <div class="cat-header__line"></div>
-              <p class="cat__quote up"><span th:text="#{index.quoteBefore}">一片心意，一点梦想，一段生活——感谢阅读。故事还在</span> <a th:href="@{/}" class="text-link" th:text="${site.title}"></a> <span th:text="#{index.quoteAfter}">继续，期待你的陪伴。</span></p>
+              <p class="cat__quote up">
+                <th:block th:if="${not #strings.isEmpty(theme.config?.homepage?.quote_custom)}"
+                          th:text="${theme.config.homepage.quote_custom}"></th:block>
+                <th:block th:unless="${not #strings.isEmpty(theme.config?.homepage?.quote_custom)}">
+                  <span th:text="#{index.quoteBefore}">一片心意，一点梦想，一段生活——感谢阅读。故事还在</span>
+                  <a th:href="@{/}" class="text-link" th:text="${site.title}"></a>
+                  <span th:text="#{index.quoteAfter}">继续，期待你的陪伴。</span>
+                </th:block>
+              </p>
             </header>
           </li>
         </ul>

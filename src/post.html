@@ -3,7 +3,14 @@
       <title th:text="|${post?.spec?.title} - ${site.title}|"></title>
     </template>
 
-    <div class="post-content">
+    <div class="post-content"
+         th:with="showToc=${theme.config?.post?.show_toc ?: true},
+                  showMetaStats=${theme.config?.post?.show_meta_stats ?: true},
+                  showPrevNext=${theme.config?.post?.show_prev_next ?: true},
+                  showCopyright=${theme.config?.post?.show_copyright ?: false},
+                  showRelated=${theme.config?.post?.show_related ?: false},
+                  showUpvote=${theme.config?.post?.show_post_upvote ?: false},
+                  showCodeCopy=${theme.config?.post?.show_code_copy ?: true}">
       <div class="page-main">
         <div class="page-img_content">
           <!-- 文章头图 -->
@@ -20,19 +27,54 @@
               <header class="post__header">
                 <h1 class="post__title" th:text="${post?.spec?.title}"></h1>
                 <div class="post__meta">
-                  <div class="post__meta-group" th:if="${post?.categories != null and not post.categories.isEmpty()}">
-                    <i class="Nug Nug-wenzhang2 post__meta-icon"></i>
-                    <a class="post__category" th:each="category : ${post.categories}" th:href="@{${category?.status?.permalink}}" th:text="${category?.spec?.displayName}"></a>
+                  <div class="post__meta-chips">
+                    <div class="post__meta-group" th:if="${post?.categories != null and not post.categories.isEmpty()}">
+                      <i class="Nug Nug-wenzhang2 post__meta-icon"></i>
+                      <a class="post__category" th:each="category : ${post.categories}" th:href="@{${category?.status?.permalink}}" th:text="${category?.spec?.displayName}"></a>
+                    </div>
+                    <span class="post__meta-sep" th:if="${post?.categories != null and not post.categories.isEmpty() and post?.tags != null and not post.tags.isEmpty()}"></span>
+                    <div class="post__meta-group" th:if="${post?.tags != null and not post.tags.isEmpty()}">
+                      <i class="Nug Nug-biaoqian post__meta-icon"></i>
+                      <a class="post__tag" th:each="tag : ${post.tags}" th:href="@{${tag?.status?.permalink}}" th:text="${tag?.spec?.displayName}"></a>
+                    </div>
                   </div>
-                  <span class="post__meta-sep" th:if="${post?.categories != null and not post.categories.isEmpty() and post?.tags != null and not post.tags.isEmpty()}"></span>
-                  <div class="post__meta-group" th:if="${post?.tags != null and not post.tags.isEmpty()}">
-                    <i class="Nug Nug-biaoqian post__meta-icon"></i>
-                    <a class="post__tag" th:each="tag : ${post.tags}" th:href="@{${tag?.status?.permalink}}" th:text="${tag?.spec?.displayName}"></a>
+                  <div class="post__meta-stats" th:if="${showMetaStats}">
+                    <span class="post__meta-stats-item">
+                      <i class="Nug Nug-toolbar_zishutongji" aria-hidden="true"></i>
+                      <span data-everus-wordcount></span>
+                    </span>
+                    <span class="post__meta-stats-sep" aria-hidden="true"></span>
+                    <span class="post__meta-stats-item">
+                      <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <span data-everus-readtime></span>
+                    </span>
                   </div>
                 </div>
               </header>
 
-              <article class="post__content" th:utext="${post?.content?.content}"></article>
+              <!-- 文章目录（JS 提取正文标题生成，少于 3 个标题时自动隐藏） -->
+              <nav class="post-toc hidden" id="post-toc" th:if="${showToc}" th:aria-label="#{post.tocTitle}">
+                <span class="post-toc__label" th:text="#{post.tocTitle}">目录</span>
+                <div class="post-toc__list" id="post-toc-list"></div>
+              </nav>
+
+              <article class="post__content" th:utext="${post?.content?.content}"
+                       th:attr="data-code-copy=${showCodeCopy ? '1' : '0'}"></article>
+
+              <!-- 版权声明 -->
+              <div class="post-copyright" th:if="${showCopyright}"
+                   th:with="cpText=${theme.config?.post?.copyright_text ?: ''}">
+                <div class="post-copyright__head">
+                  <i class="Nug Nug-biaoqian" aria-hidden="true"></i>
+                  <span th:text="#{post.copyrightTitle}">版权声明</span>
+                </div>
+                <p class="post-copyright__text"
+                   th:if="${not #strings.isEmpty(cpText)}"
+                   th:text="${#strings.replace(#strings.replace(#strings.replace(cpText, '{title}', post?.spec?.title), '{url}', post?.status?.permalink), '{author}', post?.owner?.displayName)}"></p>
+                <p class="post-copyright__text"
+                   th:unless="${not #strings.isEmpty(cpText)}"
+                   th:text="#{post.copyrightDefault(${post?.spec?.title}, ${post?.owner?.displayName}, ${post?.status?.permalink})}"></p>
+              </div>
 
               <div class="post-divider up"></div>
 
@@ -45,7 +87,46 @@
                   <span th:text="#{post.publishTimeLabel}">发布时间：</span>
                   <th:block th:text="${post?.spec?.publishTime != null ? #temporals.format(post.spec.publishTime, 'yyyy-MM-dd') : ''}"></th:block>
                 </div>
+                <button class="post-upvote" type="button" aria-pressed="false" th:if="${showUpvote}"
+                        th:attr="onclick=|handlePostUpvote(this, '${post?.metadata?.name}')|">
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  <span th:text="#{post.likePost}">点赞</span>
+                  <span th:attr="data-upvote-post-name=|${post?.metadata?.name}|" th:text="${post?.stats?.upvote ?: 0}"></span>
+                </button>
               </div>
+
+              <!-- 上一篇 / 下一篇 -->
+              <th:block th:if="${showPrevNext}" th:with="postCursor=${postFinder.cursor(post.metadata.name)}">
+                <nav class="post-nav" th:if="${postCursor?.hasPrevious() or postCursor?.hasNext()}" aria-label="Post navigation">
+                  <a class="post-nav__item post-nav__item--prev" th:if="${postCursor?.hasPrevious()}"
+                     th:href="@{${postCursor.previous.status.permalink}}">
+                    <span class="post-nav__label" th:text="#{post.prevLabel}">上一篇</span>
+                    <span class="post-nav__title" th:text="${postCursor.previous.spec.title}"></span>
+                  </a>
+                  <a class="post-nav__item post-nav__item--next" th:if="${postCursor?.hasNext()}"
+                     th:href="@{${postCursor.next.status.permalink}}">
+                    <span class="post-nav__label" th:text="#{post.nextLabel}">下一篇</span>
+                    <span class="post-nav__title" th:text="${postCursor.next.spec.title}"></span>
+                  </a>
+                </nav>
+              </th:block>
+
+              <!-- 相关文章（按第一个标签推荐） -->
+              <th:block th:if="${showRelated and post?.tags != null and not post.tags.isEmpty()}"
+                        th:with="related=${postFinder.list({page: 1, size: 4, tagName: post.tags[0].metadata.name})}">
+                <section class="post-related" th:if="${related?.items != null and not related.items.isEmpty()}">
+                  <h2 class="post-related__title" th:text="#{post.relatedTitle}">相关文章</h2>
+                  <div class="post-related__grid">
+                    <a class="post-related__item" th:each="rel : ${related.items}"
+                       th:if="${rel?.metadata?.name != post.metadata.name}"
+                       th:href="@{${rel.status.permalink}}">
+                      <span class="post-related__item-title" th:text="${rel.spec.title}"></span>
+                      <time class="post-related__item-date" th:if="${rel?.spec?.publishTime}"
+                            th:text="${#temporals.format(rel.spec.publishTime, 'yyyy-MM-dd')}"></time>
+                    </a>
+                  </div>
+                </section>
+              </th:block>
             </div>
           </div>
         </div>

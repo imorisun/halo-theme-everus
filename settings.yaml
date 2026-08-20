@@ -8,11 +8,67 @@ spec:
     - group: style
       label: 样式与字体
       formSchema:
+        - $formkit: color
+          name: accent_color
+          label: 主题色
+          value: "#26a760"
+          help: "全局强调色（链接、按钮、图标、选择高亮等）。留空或填 #26a760 使用默认绿色"
         - $formkit: text
           name: custom_font
           label: 自定义字体URL
           value: ""
           help: "输入字体文件的URL地址，留空则使用默认系统字体。支持 woff2、woff、ttf、eot、svg 格式"
+        - $formkit: code
+          name: custom_css
+          label: 自定义 CSS
+          value: ""
+          language: css
+          height: 200px
+          help: "自定义样式会追加到每个页面的 <head> 末尾，可覆盖主题默认样式"
+
+    # ────────── 全局 ──────────
+    - group: global
+      label: 全局
+      formSchema:
+        - $formkit: code
+          name: head_code
+          label: 自定义 head 代码
+          value: ""
+          language: html
+          height: 160px
+          help: "注入到页面 <head> 末尾的 HTML，可用于网站统计代码、搜索引擎验证 meta 标签等"
+        - $formkit: code
+          name: footer_code
+          label: 页脚代码
+          value: ""
+          language: html
+          height: 160px
+          help: "注入到页面 </body> 之前的 HTML，可用于统计脚本、在线客服组件等"
+        - $formkit: switch
+          name: particles_enabled
+          label: 粒子背景
+          value: false
+          help: "在页面背景显示漂浮的粒子动画，颜色跟随主题色，自动尊重系统「减少动态效果」偏好"
+        - $formkit: number
+          name: particles_count
+          label: 粒子数量
+          value: 60
+          help: "粒子数量（10 ~ 150），仅在开启粒子背景时生效"
+        - $formkit: switch
+          name: show_reading_progress
+          label: 阅读进度条
+          value: true
+          help: "在页面顶部显示阅读进度条，随页面滚动增长"
+        - $formkit: switch
+          name: show_runtime
+          label: 显示站点运行时间
+          value: false
+          help: "在页脚显示网站已运行的时长"
+        - $formkit: date
+          name: site_start_date
+          label: 网站成立日期
+          value: ""
+          help: "用于计算站点运行时间，例如 2020-01-01。仅开启「显示站点运行时间」时生效"
 
     # ────────── 首页 ──────────
     - group: homepage
@@ -23,6 +79,88 @@ spec:
           label: Banner 背景图
           value: ""
           help: "首页顶部Banner的背景图片，留空则使用默认暗色渐变"
+        - $formkit: text
+          name: banner_title
+          label: Banner 主标题
+          value: ""
+          help: "显示在 Banner 中央的大标题，留空则不显示"
+        - $formkit: text
+          name: banner_subtitle
+          label: Banner 副标题
+          value: ""
+          help: "显示在主标题下方的文字，留空则不显示"
+        - $formkit: number
+          name: posts_count
+          label: 首页文章数量
+          value: 8
+          help: "首页「最新文章」展示的文章条数，建议 4 ~ 20"
+        - $formkit: switch
+          name: show_latest_posts
+          label: 显示最新文章
+          value: true
+          help: "关闭后首页不再显示「最新文章」板块"
+        - $formkit: switch
+          name: show_latest_moments
+          label: 显示最新动态
+          value: true
+          help: "需要安装 Moments 插件。关闭后首页不再显示「最新动态」板块"
+        - $formkit: switch
+          name: show_quote
+          label: 显示结语引用
+          value: true
+          help: "关闭后首页不再显示底部结语"
+        - $formkit: text
+          name: quote_custom
+          label: 自定义结语
+          value: ""
+          help: "替换默认结语文字，留空则使用默认文案"
+
+    # ────────── 文章页 ──────────
+    - group: post
+      label: 文章页
+      formSchema:
+        - $formkit: switch
+          name: show_toc
+          label: 显示文章目录
+          value: true
+          help: "自动提取文章标题生成胶囊式目录，少于 3 个标题时自动隐藏。超宽屏（≥1780px）下悬浮在正文左侧空白区，不会遮挡正文与评论"
+        - $formkit: switch
+          name: show_meta_stats
+          label: 显示字数与阅读时长
+          value: true
+          help: "在文章标题下方显示字数统计与预计阅读时长"
+        - $formkit: switch
+          name: show_prev_next
+          label: 显示上一篇 / 下一篇
+          value: true
+          help: "文章末尾显示上一篇 / 下一篇导航"
+        - $formkit: switch
+          name: show_copyright
+          label: 显示版权声明
+          value: false
+          help: "在文章末尾显示版权声明"
+        - $formkit: textarea
+          name: copyright_text
+          label: 自定义版权声明
+          value: ""
+          help: |
+            支持占位符 {title}（文章标题）、{url}（文章链接）、{author}（作者名），
+            留空则显示默认版权声明。仅开启「显示版权声明」时生效
+        - $formkit: switch
+          name: show_related
+          label: 显示相关文章
+          value: false
+          help: "根据文章的第一个标签推荐 4 篇相关文章"
+        - $formkit: switch
+          name: show_post_upvote
+          label: 显示文章点赞
+          value: false
+          help: "在文章末尾显示点赞按钮，仅登录用户点赞成功后计入"
+        - $formkit: switch
+          name: show_code_copy
+          label: 代码块复制按钮
+          value: true
+          help: "文章与页面中的代码块右上角显示复制按钮"
 
     # ────────── 页脚 ──────────
     - group: footer
@@ -63,6 +201,33 @@ spec:
           label: 公开显示手机号
           value: false
           help: "在作者页面侧边栏中显示手机号信息"
+        - $formkit: array
+          name: socials
+          label: 社交链接
+          value: []
+          addLabel: 添加社交链接
+          emptyText: 暂无社交链接
+          itemLabels:
+            - type: iconify
+              label: $value.icon
+            - type: text
+              label: $value.name
+          children:
+            - $formkit: text
+              name: name
+              label: 名称
+              value: ""
+              validation: required
+            - $formkit: url
+              name: url
+              label: 链接
+              value: ""
+              validation: required
+            - $formkit: iconify
+              name: icon
+              label: 图标
+              format: svg
+              value-only: true
 
     # ────────── 音乐 ──────────
     - group: music

@@ -12,7 +12,8 @@
                   <h1 class="post__title" th:text="${singlePage.spec.title}"></h1>
                 </header>
 
-                <article class="post__content" th:utext="${singlePage.content.content}"></article>
+                <article class="post__content" th:utext="${singlePage.content.content}"
+                         th:attr="data-code-copy=${(theme.config?.post?.show_code_copy ?: true) ? '1' : '0'}"></article>
 
                 <div class="post-divider up"></div>
 

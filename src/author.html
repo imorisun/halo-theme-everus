@@ -80,6 +80,19 @@
                 <span th:text="${author?.spec?.phone}"></span>
               </div>
             </div>
+
+            <!-- 社交链接（主题设置 → 作者页 → 社交链接） -->
+            <div class="archive-sidebar__socials" th:if="${theme.config?.author?.socials != null and not theme.config.author.socials.isEmpty()}">
+              <a class="archive-sidebar__social"
+                 th:each="social : ${theme.config.author.socials}"
+                 th:href="${#strings.isEmpty(social?.url) ? '#' : social.url}"
+                 th:title="${social?.name}"
+                 target="_blank" rel="noopener noreferrer nofollow">
+                <span class="archive-sidebar__social-icon" th:if="${not #strings.isEmpty(social?.icon)}"
+                      th:utext="${social.icon}"></span>
+                <span th:text="${social?.name}"></span>
+              </a>
+            </div>
           </div>
 
           <!-- 统计卡 -->

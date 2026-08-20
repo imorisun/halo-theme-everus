@@ -4,10 +4,20 @@ metadata:
   name: halo-theme-everus-setting
 spec:
   forms:
-    # ────────── 样式 ──────────
+    # ────────── 1. 样式与字体 ──────────
     - group: style
       label: 样式与字体
       formSchema:
+        - $formkit: select
+          name: color_scheme
+          label: 配色方案
+          value: "dark"
+          options:
+            - label: 暗色系（默认）
+              value: dark
+            - label: 亮色系
+              value: light
+          help: "站点整体配色。亮色系为白色基底 + 绿色点缀的杂志风格，文章灯箱与音乐播放器保持暗色以呈现最佳观感"
         - $formkit: color
           name: accent_color
           label: 主题色
@@ -26,51 +36,7 @@ spec:
           height: 200px
           help: "自定义样式会追加到每个页面的 <head> 末尾，可覆盖主题默认样式"
 
-    # ────────── 全局 ──────────
-    - group: global
-      label: 全局
-      formSchema:
-        - $formkit: code
-          name: head_code
-          label: 自定义 head 代码
-          value: ""
-          language: html
-          height: 160px
-          help: "注入到页面 <head> 末尾的 HTML，可用于网站统计代码、搜索引擎验证 meta 标签等"
-        - $formkit: code
-          name: footer_code
-          label: 页脚代码
-          value: ""
-          language: html
-          height: 160px
-          help: "注入到页面 </body> 之前的 HTML，可用于统计脚本、在线客服组件等"
-        - $formkit: switch
-          name: particles_enabled
-          label: 粒子背景
-          value: false
-          help: "在页面背景显示漂浮的粒子动画，颜色跟随主题色，自动尊重系统「减少动态效果」偏好"
-        - $formkit: number
-          name: particles_count
-          label: 粒子数量
-          value: 60
-          help: "粒子数量（10 ~ 150），仅在开启粒子背景时生效"
-        - $formkit: switch
-          name: show_reading_progress
-          label: 阅读进度条
-          value: true
-          help: "在页面顶部显示阅读进度条，随页面滚动增长"
-        - $formkit: switch
-          name: show_runtime
-          label: 显示站点运行时间
-          value: false
-          help: "在页脚显示网站已运行的时长"
-        - $formkit: date
-          name: site_start_date
-          label: 网站成立日期
-          value: ""
-          help: "用于计算站点运行时间，例如 2020-01-01。仅开启「显示站点运行时间」时生效"
-
-    # ────────── 首页 ──────────
+    # ────────── 2. 首页 ──────────
     - group: homepage
       label: 首页
       formSchema:
@@ -89,21 +55,28 @@ spec:
           label: Banner 副标题
           value: ""
           help: "显示在主标题下方的文字，留空则不显示"
-        - $formkit: number
-          name: posts_count
-          label: 首页文章数量
-          value: 8
-          help: "首页「最新文章」展示的文章条数，建议 4 ~ 20"
         - $formkit: switch
           name: show_latest_posts
           label: 显示最新文章
           value: true
           help: "关闭后首页不再显示「最新文章」板块"
+        - $formkit: number
+          name: posts_count
+          label: 最新文章数量
+          value: 8
+          min: 1
+          help: "「最新文章」板块展示的文章条数，建议 4 ~ 20"
         - $formkit: switch
           name: show_latest_moments
           label: 显示最新动态
           value: true
           help: "需要安装 Moments 插件。关闭后首页不再显示「最新动态」板块"
+        - $formkit: number
+          name: moments_count
+          label: 最新动态数量
+          value: 6
+          min: 1
+          help: "「最新动态」板块展示的瞬间条数，建议 3 ~ 12"
         - $formkit: switch
           name: show_quote
           label: 显示结语引用
@@ -115,7 +88,7 @@ spec:
           value: ""
           help: "替换默认结语文字，留空则使用默认文案"
 
-    # ────────── 文章页 ──────────
+    # ────────── 3. 文章页 ──────────
     - group: post
       label: 文章页
       formSchema:
@@ -129,6 +102,11 @@ spec:
           label: 显示字数与阅读时长
           value: true
           help: "在文章标题下方显示字数统计与预计阅读时长"
+        - $formkit: switch
+          name: show_code_copy
+          label: 代码块复制按钮
+          value: true
+          help: "文章与页面中的代码块右上角显示复制按钮"
         - $formkit: switch
           name: show_prev_next
           label: 显示上一篇 / 下一篇
@@ -156,13 +134,8 @@ spec:
           label: 显示文章点赞
           value: false
           help: "在文章末尾显示点赞按钮，仅登录用户点赞成功后计入"
-        - $formkit: switch
-          name: show_code_copy
-          label: 代码块复制按钮
-          value: true
-          help: "文章与页面中的代码块右上角显示复制按钮"
 
-    # ────────── 页脚 ──────────
+    # ────────── 4. 页脚 ──────────
     - group: footer
       label: 页脚
       formSchema:
@@ -187,7 +160,7 @@ spec:
           value: ""
           help: "仅输入备案号，如：京公网安备 11010102000001号"
 
-    # ────────── 作者页 ──────────
+    # ────────── 5. 作者页 ──────────
     - group: author
       label: 作者页
       formSchema:
@@ -229,7 +202,7 @@ spec:
               format: svg
               value-only: true
 
-    # ────────── 音乐 ──────────
+    # ────────── 6. 音乐播放器 ──────────
     - group: music
       label: 音乐播放器
       formSchema:
@@ -255,3 +228,49 @@ spec:
               value: netease
             - label: QQ音乐
               value: tencent
+
+    # ────────── 7. 全局 ──────────
+    - group: global
+      label: 全局
+      formSchema:
+        - $formkit: switch
+          name: particles_enabled
+          label: 粒子背景
+          value: false
+          help: "在页面背景显示漂浮的粒子动画，颜色跟随主题色，自动尊重系统「减少动态效果」偏好"
+        - $formkit: number
+          name: particles_count
+          label: 粒子数量
+          value: 60
+          min: 10
+          max: 150
+          help: "粒子数量（10 ~ 150），仅在开启粒子背景时生效"
+        - $formkit: switch
+          name: show_reading_progress
+          label: 阅读进度条
+          value: true
+          help: "在页面顶部显示阅读进度条，随页面滚动增长"
+        - $formkit: switch
+          name: show_runtime
+          label: 显示站点运行时间
+          value: false
+          help: "在页脚显示网站已运行的时长"
+        - $formkit: date
+          name: site_start_date
+          label: 网站成立日期
+          value: ""
+          help: "用于计算站点运行时间，例如 2020-01-01。仅开启「显示站点运行时间」时生效"
+        - $formkit: code
+          name: head_code
+          label: 自定义 head 代码
+          value: ""
+          language: html
+          height: 160px
+          help: "注入到页面 <head> 末尾的 HTML，可用于网站统计代码、搜索引擎验证 meta 标签等"
+        - $formkit: code
+          name: footer_code
+          label: 页脚代码
+          value: ""
+          language: html
+          height: 160px
+          help: "注入到页面 </body> 之前的 HTML，可用于统计脚本、在线客服组件等"

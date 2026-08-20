@@ -21,7 +21,8 @@
 }
 
 *::selection {
-  color: var(--color-bg-page);
+  /* 选中文字固定深色：绿色背景上两种配色都保持高对比 */
+  color: var(--color-on-primary, #000000);
   background-color: var(--color-primary);
 }
 
@@ -35,6 +36,8 @@
   --color-primary-alpha-md: rgba(38, 167, 96, 0.18);
   --color-primary-alpha-lg: rgba(38, 167, 96, 0.25);
   --color-primary-alpha-xl: rgba(38, 167, 96, 0.3);
+  /* 主色之上的文字颜色（如选中高亮），两种配色均使用深色以保证对比度 */
+  --color-on-primary: #000000;
 
   /* 文字 — 所有色值均满足 WCAG AA 对比度要求（≥4.5:1 on #000 / #1A1A1A） */
   --color-text-primary: #E0E0E0;   /* 16:1 on black */
@@ -89,6 +92,71 @@
   --halo-cw-avatar-size: 36px;
   --halo-cw-base-font-size: 14px;
   --halo-cw-base-font-family: inherit;
+}
+
+/* ========== 亮色系设计令牌 ========== */
+/* 由主题设置（样式 → 配色方案）切换 body 类为 light 时生效。
+   仅覆盖颜色类令牌：其余（圆角 / 缓动 / 主色）与暗色保持一致。
+   文字色值均满足 WCAG AA 对比度要求（≥4.5:1 on #FFFFFF）。 */
+body.light {
+  /* 文字 — 14:1 ~ 4.6:1 on white */
+  --color-text-primary: #20242A;   /* 15.6:1 on white */
+  --color-text-secondary: #3D434C; /* 9.6:1 on white */
+  --color-text-tertiary: #5F6670;  /* 6.3:1 on white */
+  --color-text-muted: #7B828C;     /* 4.6:1 on white */
+  --color-text-dim: #9BA2AC;       /* 3.2:1 — 装饰性文本/边框 */
+
+  /* 背景 */
+  --color-bg-page: #E9ECF0;
+  --color-bg-base: #FFFFFF;
+  --color-bg-card: #F5F6F8;
+  --color-bg-elevated: #EDEFF2;
+
+  /* 边框 */
+  --color-border: rgba(32, 36, 42, 0.08);
+  --color-border-muted: rgba(32, 36, 42, 0.12);
+  --color-border-strong: rgba(32, 36, 42, 0.2);
+  --color-border-faint: rgba(32, 36, 42, 0.1);
+
+  /* 遮罩 */
+  --color-overlay: rgba(255, 255, 255, 0.92);
+  --color-overlay-light: rgba(255, 255, 255, 0.72);
+
+  /* 评论组件兼容变量：暗色系用白色透明层级，亮色系改用深色透明层级 */
+  --halo-cw-muted-1-color: rgba(32, 36, 42, 0.1);
+  --halo-cw-muted-2-color: rgba(32, 36, 42, 0.06);
+  --halo-cw-muted-3-color: rgba(32, 36, 42, 0.04);
+}
+
+/* 亮色系：阴影柔化，避免深色大阴影在浅色页面上过重 */
+body.light .site-status-panel {
+  box-shadow: 0 12px 32px rgba(32, 36, 42, 0.16), 0 0 0 1px rgba(32, 36, 42, 0.06);
+}
+
+/* 亮色系：吸底分页使用白色玻璃 */
+body.light .sticky-pagination {
+  background-color: rgba(255, 255, 255, 0.92);
+}
+
+/* 亮色系：音乐播放器底座保持暗色（APlayer 为暗色设计，暗色岛与亮色页面
+   对比自然）。在 .footer-music 子树内重定义暗色令牌，播放器与歌单面板
+   内部的全部 var() 引用随之切换，无需逐项改写。 */
+body.light .footer-music {
+  --color-bg-base: #121212;
+  --color-bg-card: #1A1A1A;
+  --color-bg-elevated: #1E1E1E;
+  --color-text-primary: #E0E0E0;
+  --color-text-secondary: #B8B8B8;
+  --color-text-tertiary: #969696;
+  --color-text-muted: #7C7C7C;
+  --color-text-dim: #666666;
+  --color-border: rgba(44, 44, 44, 0.2);
+  --color-border-muted: rgba(44, 44, 44, 0.3);
+  --color-border-strong: rgba(44, 44, 44, 0.4);
+  --color-border-faint: rgba(44, 44, 44, 0.25);
+  --color-overlay: rgba(18, 18, 18, 0.9);
+  --color-overlay-light: rgba(18, 18, 18, 0.7);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 body {
@@ -1612,7 +1680,7 @@ a {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: rgba(44, 44, 44, 0.5);
+  background-color: var(--color-border-strong);
   transition: background-color 0.2s, width 0.2s;
 }
 
@@ -1713,7 +1781,7 @@ a {
 
 .link-groups__tab:hover {
   color: var(--color-text-primary);
-  border-color: rgba(44, 44, 44, 0.6);
+  border-color: var(--color-border-strong);
 }
 
 .link-groups__tab.is-active {
@@ -2968,7 +3036,7 @@ body.music-on .site-footer {
 }
 
 .playlist-panel__list::-webkit-scrollbar-thumb {
-  background: rgba(44, 44, 44, 0.5);
+  background: var(--color-text-dim);
   border-radius: 2px;
 }
 

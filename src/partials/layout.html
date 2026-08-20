@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" th:content="${(theme.config?.style?.color_scheme ?: 'dark') == 'light' ? '#E9ECF0' : '#000000'}" />
     <!--
       不要在此手写 description / keywords / og:* / twitter:* / canonical。
       Halo 会在运行时针对当前页面（文章 / 分类 / 标签 / 作者…）自动注入这些标签。
@@ -88,7 +88,8 @@
     <th:block th:utext="${theme.config?.global?.head_code}"></th:block>
   </head>
 
-  <body class="dark">
+  <!-- 配色方案：dark 暗色（默认）/ light 亮色，由主题设置切换 -->
+  <body th:class="${(theme.config?.style?.color_scheme ?: 'dark') == 'light' ? 'light' : 'dark'}">
     <!-- 粒子背景（跟随主题色，位于所有内容之下） -->
     <canvas id="everus-particles" class="particles-canvas" aria-hidden="true"
             th:if="${theme.config?.global?.particles_enabled ?: false}"

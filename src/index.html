@@ -16,8 +16,12 @@
         <ul class="cat-group__list">
 
           <!-- 最新文章 -->
+          <!-- 直接使用 list(page, size) 重载并让 SpEL 收敛参数类型：
+               不在模板里对配置值做算术/比较（配置保存后的值类型不可控，
+               字符串与数字比较会抛异常导致整页 500）。排序沿用 Finder 的
+               默认排序（置顶 → 优先级 → 发布时间）。 -->
           <li class="cat-group__item" th:if="${theme.config?.homepage?.show_latest_posts ?: true}"
-              th:with="count=${theme.config?.homepage?.posts_count ?: 8}, homePosts=${postFinder.list({page: 1, size: (count > 0 ? count : 8), sort: {'spec.publishTime,desc'}})}">
+              th:with="homePosts=${postFinder.list(1, theme.config?.homepage?.posts_count ?: 8)}">
             <header class="cat-header up">
               <h2 class="cat-header__title" th:text="#{index.latestPosts}">最新文章</h2>
               <div class="cat-header__line"></div>
@@ -50,7 +54,7 @@
 
           <!-- 最新动态（瞬间插件） -->
           <th:block th:if="${(theme.config?.homepage?.show_latest_moments ?: true) and momentFinder != null}">
-            <th:block th:with="homeMoments=${momentFinder.list(1, 6)}">
+            <th:block th:with="homeMoments=${momentFinder.list(1, theme.config?.homepage?.moments_count ?: 6)}">
               <li class="cat-group__item" th:if="${homeMoments?.items != null and not homeMoments.items.isEmpty()}">
                 <header class="cat-header up">
                   <h2 class="cat-header__title" th:text="#{index.latestMoments}">最新动态</h2>
@@ -104,8 +108,8 @@
                     </div>
                   </li>
 
-                  <!-- 查看更多 -->
-                  <li class="cat-posts__more" th:if="${homeMoments?.total > 6}">
+                  <!-- 查看更多（不再用 total 与配置值做比较，避免类型问题） -->
+                  <li class="cat-posts__more">
                     <a th:href="@{/moments}" class="more-link">
                       <span th:text="#{index.allMoments}">全部动态</span>
                       <span class="more-link__count"><em th:text="${homeMoments.total}"></em> <span th:text="#{unit.momentsShort}">条</span></span>

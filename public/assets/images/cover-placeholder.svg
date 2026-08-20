@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  文章卡片默认封面占位图。
+  替代原先复用的 assets/images/bg.jpg（134 KB）—— 那是首页 Banner 用的大图，
+  被当作每张无封面文章卡片的缩略图，解码开销与体积都不合理。
+  viewBox 比例 4:3 与 .post-card__cover 的 aspect-ratio 一致；配色取主题的
+  深色底 + 主色 #26a760。
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="everus-ph-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#131313"/>
+      <stop offset="1" stop-color="#1f1f1f"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#everus-ph-bg)"/>
+  <g fill="none" stroke="#26a760" stroke-opacity="0.32" stroke-width="6"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M166 112h56a12 12 0 0 1 12 12v52a12 12 0 0 1-12 12h-56a12 12 0 0 1-12-12v-52a12 12 0 0 1 12-12z"/>
+    <path d="M176 136h36"/>
+    <path d="M176 152h36"/>
+    <path d="M176 168h22"/>
+  </g>
+</svg>

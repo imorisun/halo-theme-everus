@@ -130,6 +130,7 @@ function _everusCreatePlayer(songs) {
   if (typeof APlayer === 'undefined') return;
 
   if (_everusPlayer) {
+    _everusTeardownMobileLrc();
     try { _everusPlayer.destroy(); } catch (e) {}
     _everusPlayer = null;
   }
@@ -220,9 +221,30 @@ function _everusEscape(str) {
 }
 
 /* 移动端自定义歌词显示：监听 APlayer 原生歌词 DOM 变化，同步到独立显示元素 */
+var _everusLrcObserver = null;
+var _everusLrcRetryTimer = null;
+
+/**
+ * 停止歌词同步并释放资源。
+ * 播放器被重建（_everusCreatePlayer 里 destroy 旧实例）时必须调用，
+ * 否则旧的 observer / 重试定时器会残留并叠加。
+ */
+function _everusTeardownMobileLrc() {
+  if (_everusLrcObserver) {
+    _everusLrcObserver.disconnect();
+    _everusLrcObserver = null;
+  }
+  if (_everusLrcRetryTimer) {
+    clearTimeout(_everusLrcRetryTimer);
+    _everusLrcRetryTimer = null;
+  }
+}
+
 function _everusInitMobileLrc(container) {
   var display = document.querySelector('.mobile-lrc-text');
   if (!display) return;
+
+  _everusTeardownMobileLrc();
 
   // 等待 APlayer 渲染出 .aplayer-lrc-contents（异步创建，需要延迟获取）
   var tryInit = function (retries) {
@@ -230,12 +252,11 @@ function _everusInitMobileLrc(container) {
     var lrcContents = container.querySelector('.aplayer-lrc .aplayer-lrc-contents');
     if (!lrcContents) {
       if (retries < 20) {
-        setTimeout(function () { tryInit(retries + 1); }, 300);
+        _everusLrcRetryTimer = setTimeout(function () { tryInit(retries + 1); }, 300);
       }
       return;
     }
 
-    // 定时轮询当前歌词行（确保兼容性）
     var lastText = '';
     var syncLrc = function () {
       var current = lrcContents.querySelector('.aplayer-lrc-current');
@@ -251,8 +272,22 @@ function _everusInitMobileLrc(container) {
     // 初始同步
     syncLrc();
 
-    // 每 400ms 轮询一次
-    setInterval(syncLrc, 400);
+    // 改用 MutationObserver 取代原先的 setInterval(syncLrc, 400)。
+    // 原实现每 400ms 轮询一次且从不 clearInterval：整个会话期间持续运行，
+    // 音乐暂停、播放器销毁、甚至桌面端（该元素本就隐藏）都在空转。
+    //
+    // 之所以能用 observer 精确替代：APlayer 切换歌词行的实现就是
+    //   getElementsByClassName('aplayer-lrc-current')[0].classList.remove(...)
+    //   getElementsByTagName('p')[t].classList.add('aplayer-lrc-current')
+    // 即通过增删子元素的 class 来标记当前行（另外会改容器的 transform），
+    // 因此监听 subtree 内的 class/style 变化必然覆盖每一次歌词更新。
+    _everusLrcObserver = new MutationObserver(syncLrc);
+    _everusLrcObserver.observe(lrcContents, {
+      attributes: true,
+      attributeFilter: ['class', 'style'],
+      subtree: true,
+      childList: true
+    });
   };
 
   tryInit();

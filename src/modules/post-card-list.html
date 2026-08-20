@@ -9,10 +9,19 @@
           <img th:if="${not #strings.isEmpty(post?.spec?.cover)}"
                th:src="${post.spec.cover}"
                th:alt="${post?.spec?.title}" loading="lazy" />
+          <!--
+            无封面时的占位图改用 cover-placeholder.svg（约 1 KB）。
+            原先复用的 bg.jpg 是首页 Banner 大图（134 KB），
+            当缩略图用体积与解码开销都不合理。
+          -->
           <img th:unless="${not #strings.isEmpty(post?.spec?.cover)}"
-               th:src="@{/assets/images/bg.jpg}"
+               th:src="@{/assets/images/cover-placeholder.svg}"
                th:alt="${post?.spec?.title}" loading="lazy" />
-          <span class="post-card__index" th:text="${'0' + (iterStat.index + 1)}"></span>
+          <!--
+            序号补零用 #numbers.formatInteger 而非字符串拼接 '0' + n：
+            原写法在第 10 项及以后会输出 "010"、"011"。
+          -->
+          <span class="post-card__index" th:text="${#numbers.formatInteger(iterStat.count, 2)}"></span>
         </figure>
 
         <!-- 信息 -->

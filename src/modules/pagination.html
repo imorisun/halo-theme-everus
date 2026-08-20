@@ -1,17 +1,30 @@
 <!-- 通用分页组件 -->
 <th:block th:fragment="pagination(posts)">
-  <nav class="sticky-pagination" th:if="${posts?.hasPrevious() or posts?.hasNext()}">
+  <!--
+    dotLimit —— 圆点式分页所允许的最大页数。
+    原实现用 #numbers.sequence(1, totalPages) 为「每一页」渲染一个圆点：
+    100 页就是 100 个 DOM 节点，既浪费又完全无法辨认。
+    超过上限时退化为「当前页 / 总页数」文本（.sticky-pagination__text 本就有样式）。
+
+    另外修正了一处逻辑错误：原来文本分支的条件是 th:unless="totalPages > 1"，
+    即「只有一页时才显示 N / M」—— 但只有一页时 hasPrevious/hasNext 均为 false，
+    整个 nav 根本不会渲染，所以那个分支是永远走不到的死代码。
+    比较运算符用 gt / le 而非 > / <=，避免 < 出现在属性值里。
+  -->
+  <nav class="sticky-pagination"
+       th:if="${posts?.hasPrevious() or posts?.hasNext()}"
+       th:with="curPage=${posts?.page ?: 1}, totalPages=${posts?.totalPages ?: 1}, dotLimit=10">
     <a th:if="${posts?.hasPrevious()}" th:href="@{${posts?.prevUrl}}" class="sticky-pagination__btn sticky-pagination__btn--prev">
       <i class="Nug Nug-youbian"></i>
       <span th:text="#{pagination.prev}">上一页</span>
     </a>
-    <div class="sticky-pagination__dots" th:if="${(posts?.totalPages ?: 0) > 1}">
-      <span th:each="i : ${#numbers.sequence(1, posts?.totalPages ?: 1)}"
-            th:classappend="${i == (posts?.page ?: 1) ? 'sticky-pagination__dot--active' : ''}"
+    <div class="sticky-pagination__dots" th:if="${totalPages gt 1 and totalPages le dotLimit}">
+      <span th:each="i : ${#numbers.sequence(1, totalPages)}"
+            th:classappend="${i == curPage ? 'sticky-pagination__dot--active' : ''}"
             class="sticky-pagination__dot"></span>
     </div>
-    <span class="sticky-pagination__text" th:unless="${(posts?.totalPages ?: 0) > 1}"
-          th:text="|${posts?.page ?: 1} / ${posts?.totalPages ?: 1}|"></span>
+    <span class="sticky-pagination__text" th:if="${totalPages gt dotLimit}"
+          th:text="|${curPage} / ${totalPages}|"></span>
     <a th:if="${posts?.hasNext()}" th:href="@{${posts?.nextUrl}}" class="sticky-pagination__btn sticky-pagination__btn--next">
       <span th:text="#{pagination.next}">下一页</span>
       <i class="Nug Nug-youbian"></i>
